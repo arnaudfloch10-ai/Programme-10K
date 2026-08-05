@@ -1,54 +1,47 @@
-import type { Session } from '../types'
+import type { Session, ZoneId } from '../types'
 import { resolveSession, formatSecShort } from '../lib/sessionPace'
 import { formatKm } from '../lib/format'
-import { ZoneBadge, ZoneStripe, Mono } from './ui'
+import { ZONE_COLORS } from '../lib/zones'
+import { Mono } from './ui'
 
-// Rendu détaillé d'une séance : échauffement, corps, récup — AVEC les allures.
+// Rendu détaillé d'une séance. Chaque bloc tient sur UNE seule ligne :
+// pastille · zone · distance/durée · allure cible · plage (ou récup).
 export function SessionDetail({ session, vma }: { session: Session; vma: number }) {
   const r = resolveSession(vma, session)
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {r.warmup && (
-        <Line
-          label="Échauffement"
-          zoneNode={<ZoneBadge zone={r.warmup.zone} />}
-          effort={`${formatKm(r.warmup.km)} km`}
+        <Row
+          zone={r.warmup.zone}
+          effort={`Éch ${formatKm(r.warmup.km)} km`}
           pace={r.warmup.pace}
+          trailing={r.warmup.range}
         />
       )}
 
       {r.steady && (
-        <Line
-          label="Corps"
-          zoneNode={<ZoneBadge zone={r.steady.zone} showLabel />}
+        <Row
+          zone={r.steady.zone}
           effort={`${formatKm(r.steady.km)} km`}
           pace={r.steady.pace}
+          trailing={r.steady.range}
         />
       )}
 
       {r.intervals.map((iv, i) => (
-        <div key={i} className="flex items-stretch gap-2">
-          <ZoneStripe zone={iv.zone} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="font-cond text-base font-semibold">{iv.effortLabel}</span>
-              {iv.paceLabel ? (
-                <Mono className="text-base font-semibold">{iv.paceLabel}<span className="text-xs text-ink-soft">/km</span></Mono>
-              ) : (
-                <span className="font-cond text-xs text-ink-soft">effort libre</span>
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-2 text-xs text-ink-soft">
-              <ZoneBadge zone={iv.zone} />
-              {iv.recoveryLabel && <Mono className="text-xs">{iv.recoveryLabel}</Mono>}
-            </div>
-          </div>
-        </div>
+        <Row
+          key={i}
+          zone={iv.zone}
+          effort={iv.effortLabel}
+          pace={iv.paceLabel}
+          trailing={iv.recoveryLabel ?? iv.rangeLabel}
+          freeEffort={iv.paceLabel == null}
+        />
       ))}
 
       {r.cooldown && (
-        <Line label="Retour au calme" zoneNode={<ZoneBadge zone="Z1" />} effort={`${formatKm(r.cooldown.km)} km`} pace={null} />
+        <Row zone="Z1" effort={`RC ${formatKm(r.cooldown.km)} km`} pace={r.cooldown.pace} trailing={r.cooldown.range} />
       )}
 
       {session.raceConsigne && (
@@ -69,30 +62,35 @@ export function SessionDetail({ session, vma }: { session: Session; vma: number 
   )
 }
 
-function Line({
-  label,
-  zoneNode,
+function Row({
+  zone,
   effort,
   pace,
+  trailing,
+  freeEffort,
 }: {
-  label: string
-  zoneNode: React.ReactNode
+  zone: ZoneId
   effort: string
   pace: string | null
+  trailing: string | null
+  freeEffort?: boolean
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-2">
-      <div className="flex items-baseline gap-2">
-        <span className="label w-24 shrink-0">{label}</span>
-        <span className="font-cond text-sm">{effort}</span>
-        {zoneNode}
-      </div>
-      {pace && (
-        <Mono className="text-sm">
+    <div className="flex items-center gap-2 text-sm">
+      <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap">
+        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: ZONE_COLORS[zone] }} aria-hidden />
+        <span className="font-cond text-xs font-bold">{zone}</span>
+      </span>
+      <span className="min-w-0 flex-1 truncate font-cond">{effort}</span>
+      {pace ? (
+        <Mono className="shrink-0 whitespace-nowrap text-[15px] font-semibold">
           {pace}
           <span className="text-xs text-ink-soft">/km</span>
         </Mono>
-      )}
+      ) : freeEffort ? (
+        <span className="shrink-0 whitespace-nowrap font-cond text-xs text-ink-soft">effort libre</span>
+      ) : null}
+      {trailing && <Mono className="shrink-0 whitespace-nowrap text-xs text-ink-soft">{trailing}</Mono>}
     </div>
   )
 }

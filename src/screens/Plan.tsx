@@ -23,6 +23,10 @@ export function Plan() {
     label: w.label,
   }))
 
+  // Plafond d'axe : ~10 % de marge, arrondi au multiple de 5 supérieur.
+  const maxKm = data.reduce((m, d) => Math.max(m, d.km), 0)
+  const axisMax = Math.max(Math.round((maxKm * 1.1) / 5) * 5, Math.ceil(maxKm / 5) * 5)
+
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
@@ -36,7 +40,7 @@ export function Plan() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 16, right: 4, left: -16, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, axisMax]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <Bar dataKey="km" radius={[2, 2, 0, 0]}>
                 <LabelList dataKey="km" position="top" style={{ fontSize: 10, fill: '#4a4a4a' }} />
                 {data.map((d, i) => (

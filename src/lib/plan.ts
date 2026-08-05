@@ -1,6 +1,23 @@
 // Calculs de rattachement séance ↔ semaine ↔ date. Pur.
-import type { LoggedSession, Session, Week } from '../types'
+import type { LoggedSession, Session, Week, ZoneId } from '../types'
 import { dayOfWeekMon1, parseISODate } from './format'
+
+/** Zone prescrite « principale » d'une séance (pour l'agrégation à défaut de zone tenue). */
+export function prescribedZone(s: Session): ZoneId {
+  if (s.steadyZone) return s.steadyZone
+  const iv = s.intervals?.find((i) => i.zone !== 'FORCE' && i.zone !== 'REST')
+  if (iv) return iv.zone
+  return s.warmupZone ?? 'Z2'
+}
+
+/** Retrouve une séance par son id dans l'ensemble des semaines. */
+export function findSessionById(weeks: Week[], sessionId: string): Session | undefined {
+  for (const w of weeks) {
+    const s = w.sessions.find((x) => x.id === sessionId)
+    if (s) return s
+  }
+  return undefined
+}
 
 /** Semaine du plan contenant la date ISO, ou null si hors plan. */
 export function findWeekForDate(weeks: Week[], iso: string): Week | null {

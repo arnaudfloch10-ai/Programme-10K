@@ -11,9 +11,9 @@ import {
   Legend as RLegend,
 } from 'recharts'
 import { useApp } from '../store/AppContext'
-import { weekDoneKm, weekPlannedKm } from '../lib/plan'
+import { weekDoneKm, weekPlannedKm, findSessionById, prescribedZone } from '../lib/plan'
 import { z1z2Distribution } from '../lib/alerts'
-import { ZONE_COLORS, ZONE_ORDER, formatPace } from '../lib/zones'
+import { ZONE_COLORS, ZONE_ORDER, formatPace, zonePace, isTrainingZone } from '../lib/zones'
 import { formatShortDate } from '../lib/format'
 import { Mono } from '../components/ui'
 
@@ -27,21 +27,30 @@ export function Journal() {
     realise: Math.round(weekDoneKm(w, logs) * 10) / 10,
   }))
 
-  // Temps par zone (s) : actualKm × actualPaceS attribué à la zone tenue.
+  // Temps par zone (s). Zone = zone réellement tenue ; à défaut, zone prescrite
+  // de la séance. Durée = km réels × allure réelle ; à défaut, valeurs prescrites.
   const secondsByZone = useMemo(() => {
     const acc: Record<string, number> = {}
     for (const l of logs) {
-      if (!l.done || !l.zoneHeld || !l.actualKm || !l.actualPaceS) continue
-      acc[l.zoneHeld] = (acc[l.zoneHeld] ?? 0) + l.actualKm * l.actualPaceS
+      if (!l.done) continue
+      const session = findSessionById(weeks, l.sessionId)
+      const zone = l.zoneHeld ?? (session ? prescribedZone(session) : undefined)
+      if (!zone || !isTrainingZone(zone)) continue
+      const km = l.actualKm ?? session?.totalKm
+      const paceS = l.actualPaceS ?? zonePace(l.vmaAtDate, zone)
+      if (!km || !paceS) continue
+      acc[zone] = (acc[zone] ?? 0) + km * paceS
     }
     return acc
-  }, [logs])
+  }, [logs, weeks])
 
   const dist = z1z2Distribution(secondsByZone)
+  const totalZoneSec = Object.values(secondsByZone).reduce((a, b) => a + b, 0)
   const zoneData = ZONE_ORDER.map((z) => ({
     zone: z,
+    pct: totalZoneSec ? Math.round(((secondsByZone[z] ?? 0) / totalZoneSec) * 100) : 0,
     min: Math.round((secondsByZone[z] ?? 0) / 60),
-  })).filter((d) => d.min > 0)
+  })).filter((d) => d.pct > 0)
 
   // Allure Z2 à FC comparable dans le temps.
   const z2Series = logs
@@ -101,10 +110,18 @@ export function Journal() {
             </div>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={zoneData} layout="vertical" margin={{ top: 0, right: 8, left: -8, bottom: 0 }}>
-                  <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <BarChart data={zoneData} layout="vertical" margin={{ top: 0, right: 12, left: -8, bottom: 0 }}>
+                  <XAxis
+                    type="number"
+                    domain={[0, 100]}
+                    ticks={[0, 25, 50, 75, 100]}
+                    tickFormatter={(v) => `${v}%`}
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <YAxis type="category" dataKey="zone" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
-                  <Bar dataKey="min" name="min" radius={[0, 2, 2, 0]}>
+                  <Bar dataKey="pct" name="%" radius={[0, 2, 2, 0]}>
                     {zoneData.map((d) => (
                       <Cell key={d.zone} fill={ZONE_COLORS[d.zone]} />
                     ))}

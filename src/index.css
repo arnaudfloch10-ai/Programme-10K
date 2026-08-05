@@ -71,6 +71,11 @@ body {
   }
   .num {
     @apply font-mono tabular-nums;
+    white-space: nowrap;
+  }
+  /* Toute valeur chiffrée suivie d'une unité ne doit jamais se couper. */
+  .nowrap {
+    white-space: nowrap;
   }
   .inp {
     @apply w-full rounded-md border border-line bg-white px-3 py-2 text-base text-ink;

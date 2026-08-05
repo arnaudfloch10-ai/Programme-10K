@@ -3,6 +3,7 @@ import { useApp } from '../store/AppContext'
 import type { Profile } from '../types'
 import type { ExportBundle } from '../db/repo'
 import { formatPace } from '../lib/zones'
+import { formatLongDate } from '../lib/format'
 
 export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: () => void }) {
   const { profile, saveProfile, exportAll, importAll } = useApp()
@@ -53,7 +54,7 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
         </div>
         <div className="rounded-md bg-paper p-2 text-xs text-ink-soft">
           À VMA {p.vma} km/h : allure 10 km <span className="num font-bold">{formatPace(3600 / (p.vma * 0.88))}</span>/km ·
-          objectif {p.goalRaceName} le {p.goalRaceDate} ({formatPace(p.goalTimeS / 10)}/km cible).
+          objectif {p.goalRaceName} le {formatLongDate(p.goalRaceDate)} ({formatPace(p.goalTimeS / 10)}/km cible).
         </div>
         <button
           onClick={async () => {
