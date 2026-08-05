@@ -24,10 +24,13 @@ export default {
         danger: '#a32e3d',
       },
       fontFamily: {
-        // Titres et volumes : condensé. Corps : sans-serif classique.
-        // Allures/temps/FC : monospace obligatoire (alignement des chiffres).
-        cond: ['"Roboto Condensed"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        // Direction serif luxe. Titres : Playfair Display (haute-contraste,
+        // signature). Corps : Cormorant Garamond (serif élégant).
+        // Allures/temps/FC : monospace OBLIGATOIRE (alignement des chiffres).
+        cond: ['"Playfair Display"', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['"Cormorant Garamond"', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
         mono: ['"Roboto Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
