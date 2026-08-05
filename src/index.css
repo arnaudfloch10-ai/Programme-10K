@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Polices auto-hébergées (latin) — aucun appel réseau au runtime. */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600 800;
+  font-display: swap;
+  src: url('/fonts/playfair-display-700-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  /* Cormorant Garamond a un œil petit : on compense taille + graisse pour la
+     lisibilité en extérieur, tout en gardant le rendu serif « luxe ». */
+  font-size: 1.075rem;
+  font-weight: 500;
+  line-height: 1.5;
+  /* Safe areas iOS pour la nav du bas. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  overscroll-behavior-y: none;
+}
+
+/* Ligatures et proportions raffinées pour le corps serif. */
+.font-sans {
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+/* Les titres Playfair gagnent en cachet avec un tracking légèrement resserré. */
+.font-cond {
+  letter-spacing: -0.005em;
+}
+
+/* Chiffres tabulaires partout où on affiche du monospace. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Cible tactile minimale. */
+.tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@layer components {
+  .card {
+    @apply border border-line bg-white rounded-md;
+  }
+  .label {
+    @apply text-xs uppercase tracking-wide text-ink-soft font-cond;
+  }
+  .num {
+    @apply font-mono tabular-nums;
+  }
+  .inp {
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-base text-ink;
+    min-height: 44px;
+  }
+  .dark .inp {
+    @apply border-[#2a2a2a] bg-[#181818] text-[#ededed];
+  }
+}
+
+/* Mode sombre (bonus). */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  @apply bg-[#111111] text-[#ededed];
+}
+.dark .card {
+  @apply border-[#2a2a2a] bg-[#181818];
+}
+.dark .label {
+  @apply text-[#9a9a9a];
+}
