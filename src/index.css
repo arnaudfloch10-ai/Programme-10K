@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  /* Safe areas iOS pour la nav du bas. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  overscroll-behavior-y: none;
+}
+
+/* Chiffres tabulaires partout où on affiche du monospace. */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Cible tactile minimale. */
+.tap {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@layer components {
+  .card {
+    @apply border border-line bg-white rounded-md;
+  }
+  .label {
+    @apply text-xs uppercase tracking-wide text-ink-soft font-cond;
+  }
+  .num {
+    @apply font-mono tabular-nums;
+  }
+  .inp {
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-base text-ink;
+    min-height: 44px;
+  }
+  .dark .inp {
+    @apply border-[#2a2a2a] bg-[#181818] text-[#ededed];
+  }
+}
+
+/* Mode sombre (bonus). */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  @apply bg-[#111111] text-[#ededed];
+}
+.dark .card {
+  @apply border-[#2a2a2a] bg-[#181818];
+}
+.dark .label {
+  @apply text-[#9a9a9a];
+}
