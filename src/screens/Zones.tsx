@@ -8,8 +8,16 @@ import type { VmaTestType } from '../types'
 import { Mono } from '../components/ui'
 import { downloadBundle } from '../lib/exportFile'
 
-// Trois colonnes seulement : pastille · code · nom (entier) · allure à droite.
-const ZONE_GRID = 'auto 40px 1fr auto'
+// Trois colonnes : pastille · code · nom (entier) · allure à droite.
+// Jetons partagés pour que la grille et le retrait de la ligne dépliée restent solidaires.
+const DOT_COL = '0.625rem' // pastille (h-2.5 w-2.5)
+const CODE_COL = '34px' // code de zone (Z1–Z5)
+const COL_GAP = '8px' // gouttière de base entre pastille/code/nom
+const NAME_PACE_GUTTER = '8px' // ajouté au gap de base → 16 px garantis nom ↔ allure
+const ROW_PAD_X = '0.75rem' // px-3
+const ZONE_GRID = `${DOT_COL} ${CODE_COL} 1fr auto`
+// Retrait = padding de ligne + pastille + code + 2 gouttières (jusqu'au début du nom).
+const DETAIL_INDENT = `calc(${ROW_PAD_X} + ${DOT_COL} + ${CODE_COL} + ${COL_GAP} + ${COL_GAP})`
 
 function hrLabel(minBpm: number | null, maxBpm: number | null): string {
   if (minBpm == null) return `<${maxBpm}`
@@ -41,20 +49,24 @@ export function Zones() {
               <button
                 onClick={() => setExpanded(open ? null : z)}
                 aria-expanded={open}
-                className="grid w-full items-center gap-x-1.5 px-3 py-3 text-left"
-                style={{ gridTemplateColumns: ZONE_GRID }}
+                className="grid w-full items-center px-3 py-3 text-left"
+                style={{ gridTemplateColumns: ZONE_GRID, columnGap: COL_GAP }}
               >
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ZONE_COLORS[z] }} aria-hidden />
                 <span className="whitespace-nowrap font-cond text-sm font-bold">{z}</span>
-                {/* Nom entier, jamais tronqué : la taille s'adapte pour tout faire tenir. */}
-                <span className="whitespace-nowrap font-cond text-[11px] uppercase text-ink-soft">
+                {/* Nom entier, jamais tronqué : la taille s'adapte pour tout faire tenir.
+                    padding-right ajoute la gouttière garantie avant l'allure. */}
+                <span
+                  className="whitespace-nowrap font-cond uppercase text-ink-soft text-[clamp(9px,2.7vw,13px)]"
+                  style={{ paddingRight: NAME_PACE_GUTTER }}
+                >
                   {def.name}
                 </span>
                 <Mono className="whitespace-nowrap text-right text-sm font-semibold">{paceRangeLabel(vma, z)}</Mono>
               </button>
               {open && (
-                <div className="px-3 pb-3 pl-[calc(40px+0.5rem+0.625rem)]">
-                  <Mono className="text-xs text-ink-soft">
+                <div className="pb-3 pr-3 text-left" style={{ paddingLeft: DETAIL_INDENT }}>
+                  <Mono className="text-xs text-[#8a8a8a]">
                     FC {hrLabel(hr.minBpm, hr.maxBpm)} bpm · 400 m en {lapRangeLabel(vma, z)}
                   </Mono>
                 </div>
