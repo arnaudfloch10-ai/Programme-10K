@@ -1,7 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, Cell, ResponsiveContainer, LabelList } from 'recharts'
 import { useApp } from '../store/AppContext'
 import { BLOCK_MILESTONES } from '../data/seedBloc0'
-import { formatDateRange, formatLongDate } from '../lib/format'
+import { formatDateRange, formatLongDate, niceAxisMax } from '../lib/format'
 import { weekDoneKm } from '../lib/plan'
 
 const CHARGE = '#3d6b7d'
@@ -23,9 +23,7 @@ export function Plan() {
     label: w.label,
   }))
 
-  // Plafond d'axe : ~10 % de marge, arrondi au multiple de 5 supérieur.
-  const maxKm = data.reduce((m, d) => Math.max(m, d.km), 0)
-  const axisMax = Math.max(Math.round((maxKm * 1.1) / 5) * 5, Math.ceil(maxKm / 5) * 5)
+  const axisMax = niceAxisMax(data.reduce((m, d) => Math.max(m, d.km), 0))
 
   return (
     <div className="space-y-5 px-4 py-4">

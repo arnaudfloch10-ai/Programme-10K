@@ -55,6 +55,16 @@ export function todayISO(): string {
   return toISODate(new Date())
 }
 
+/**
+ * Plafond « propre » d'un axe de graphique : ~10 % de marge, arrondi au
+ * multiple de 5, en garantissant que le max des données reste sous l'axe.
+ * (ex. max 41 → 45).
+ */
+export function niceAxisMax(max: number): number {
+  if (max <= 0) return 5
+  return Math.max(Math.round((max * 1.1) / 5) * 5, Math.ceil(max / 5) * 5)
+}
+
 /** Nombre de jours (signé) entre deux dates ISO : b - a. */
 export function daysBetween(aISO: string, bISO: string): number {
   const a = parseISODate(aISO).getTime()
