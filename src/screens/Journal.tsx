@@ -14,7 +14,7 @@ import { useApp } from '../store/AppContext'
 import { weekDoneKm, weekPlannedKm, findSessionById, prescribedZone } from '../lib/plan'
 import { z1z2Distribution } from '../lib/alerts'
 import { ZONE_COLORS, ZONE_ORDER, formatPace, zonePace, isTrainingZone } from '../lib/zones'
-import { formatShortDate } from '../lib/format'
+import { formatShortDate, niceAxisMax } from '../lib/format'
 import { Mono } from '../components/ui'
 
 export function Journal() {
@@ -26,6 +26,8 @@ export function Journal() {
     prevu: weekPlannedKm(w),
     realise: Math.round(weekDoneKm(w, logs) * 10) / 10,
   }))
+  // Plafond d'axe partagé avec l'écran Plan (ex. max 41 → 45).
+  const volAxisMax = niceAxisMax(weeklyVolume.reduce((m, d) => Math.max(m, d.prevu, d.realise), 0))
 
   // Temps par zone (s). Zone = zone réellement tenue ; à défaut, zone prescrite
   // de la séance. Durée = km réels × allure réelle ; à défaut, valeurs prescrites.
@@ -86,7 +88,7 @@ export function Journal() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeklyVolume} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, volAxisMax]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <RLegend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="prevu" name="prévu" fill="#d9d8d3" radius={[2, 2, 0, 0]} />
               <Bar dataKey="realise" name="réalisé" fill="#3d6b7d" radius={[2, 2, 0, 0]} />

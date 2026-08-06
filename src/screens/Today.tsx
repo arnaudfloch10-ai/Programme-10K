@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../store/AppContext'
-import { findWeekForDate, sessionForDate, findLog } from '../lib/plan'
-import { formatLongDate, daysBetween } from '../lib/format'
+import { findWeekForDate, sessionForDate, findLog, prescribedZone } from '../lib/plan'
+import { formatLongDate, daysBetween, parseISODate, toISODate, formatKm } from '../lib/format'
+import { paceRangeLabel } from '../lib/sessionPace'
 import { SessionDetail } from '../components/SessionDetail'
 import { RacePlan } from '../components/RacePlan'
 import { StrengthDetail } from '../components/StrengthDetail'
@@ -9,7 +10,8 @@ import { AlertList } from '../components/AlertBanner'
 import { Mono } from '../components/ui'
 import { LogForm } from './LogForm'
 import { routineForStrength } from '../data/strength'
-import { derivedPaces, formatPace } from '../lib/zones'
+import { derivedPaces, formatPace, ZONE_COLORS } from '../lib/zones'
+import type { Session, Week } from '../types'
 
 export function Today() {
   const { today, weeks, profile, logs, alerts } = useApp()
@@ -19,6 +21,14 @@ export function Today() {
   const session = sessionForDate(week, today)
   const log = session ? findLog(logs, session.id, today) : undefined
   const dp = derivedPaces(profile.vma)
+
+  // Jour de repos ou de renfo seul : on prépare la séance du lendemain.
+  const restLike = !!session && (session.type === 'REPOS' || session.type === 'RENFO')
+  const tomorrowD = parseISODate(today)
+  tomorrowD.setDate(tomorrowD.getDate() + 1)
+  const tomorrow = toISODate(tomorrowD)
+  const tomWeek = findWeekForDate(weeks, tomorrow)
+  const tomSession = sessionForDate(tomWeek, tomorrow)
 
   return (
     <div className="space-y-4 px-4 py-4">
@@ -49,6 +59,11 @@ export function Today() {
       {/* Séance de renfo seule (jour de Renfo B) : uniquement la routine. */}
       {session && session.type === 'RENFO' && (
         <StrengthDetail routine={routineForStrength('B')} renfoSessionId={session.id} date={today} currentWeekNumber={week?.number} />
+      )}
+
+      {/* Jour de repos / renfo : aperçu de la séance de demain, en lecture seule. */}
+      {restLike && tomSession && tomSession.type !== 'REPOS' && (
+        <NextDayPreview session={tomSession} week={tomWeek} dateISO={tomorrow} vma={profile.vma} />
       )}
 
       {session && session.type !== 'REPOS' && session.type !== 'RENFO' && (
@@ -120,6 +135,44 @@ function RefPace({ label, pace }: { label: string; pace: string }) {
     <div>
       <div className="label">{label}</div>
       <Mono className="text-lg font-semibold">{pace}</Mono>
+    </div>
+  )
+}
+
+// Aperçu lecture seule de la séance du lendemain (jours de repos / renfo).
+function NextDayPreview({
+  session,
+  week,
+  dateISO,
+  vma,
+}: {
+  session: Session
+  week: Week | null
+  dateISO: string
+  vma: number
+}) {
+  const zone = prescribedZone(session)
+  const range = paceRangeLabel(vma, zone)
+  const isRenfo = session.type === 'RENFO'
+  return (
+    <div className="card p-4">
+      <div className="label">Demain — {formatLongDate(dateISO)}</div>
+      <div className="session-title mt-1">{session.title}</div>
+      {!isRenfo && (
+        <div className="mt-2 flex items-center gap-2 text-sm">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: ZONE_COLORS[zone] }} aria-hidden />
+          <span className="font-cond text-xs font-bold">{zone}</span>
+          <span className="font-cond">{formatKm(session.totalKm)} km</span>
+          <span className="flex-1" />
+          {range && (
+            <Mono className="whitespace-nowrap text-sm">
+              {range}
+              <span className="text-xs text-ink-soft"> /km</span>
+            </Mono>
+          )}
+        </div>
+      )}
+      {week && <div className="mt-1 text-xs text-ink-soft">Semaine {week.number}</div>}
     </div>
   )
 }

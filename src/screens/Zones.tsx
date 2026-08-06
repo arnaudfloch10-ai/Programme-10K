@@ -8,8 +8,8 @@ import type { VmaTestType } from '../types'
 import { Mono } from '../components/ui'
 import { downloadBundle } from '../lib/exportFile'
 
-// Grille à colonnes fixes : les colonnes restent alignées d'une ligne à l'autre.
-const ZONE_GRID = '2.5rem minmax(0, 1fr) 5.75rem 3.5rem 4.5rem'
+// Trois colonnes seulement : pastille · code · nom (entier) · allure à droite.
+const ZONE_GRID = 'auto 40px 1fr auto'
 
 function hrLabel(minBpm: number | null, maxBpm: number | null): string {
   if (minBpm == null) return `<${maxBpm}`
@@ -20,50 +20,45 @@ function hrLabel(minBpm: number | null, maxBpm: number | null): string {
 export function Zones() {
   const { profile, vmaTests, applyVma } = useApp()
   const vma = profile.vma
+  const [expanded, setExpanded] = useState<string | null>(null)
 
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
         <h1 className="screen-title">Zones</h1>
-        <p className="text-sm text-ink-soft">Toutes les allures dérivent de la VMA.</p>
+        <p className="text-sm text-ink-soft">Allures en min/km, dérivées de la VMA. Touche une zone pour la FC et le tour de 400 m.</p>
       </header>
 
       <VmaField vma={vma} onApply={(v) => applyVma(v)} fcMax={profile.fcMax} />
 
       <div className="card overflow-hidden">
-        {/* En-têtes de colonnes */}
-        <div
-          className="grid items-center gap-x-2 border-b border-line px-3 py-2"
-          style={{ gridTemplateColumns: ZONE_GRID }}
-        >
-          <span className="label">Zone</span>
-          <span className="label" />
-          <span className="label text-right">Allure/km</span>
-          <span className="label text-right">FC</span>
-          <span className="label text-right">400 m</span>
-        </div>
-
         {ZONE_ORDER.map((z) => {
           const def = ZONES[z]
           const hr = zoneHrRange(profile.fcMax, z)
+          const open = expanded === z
           return (
-            <div
-              key={z}
-              className="grid items-center gap-x-2 border-b border-line px-3 py-2.5 last:border-0"
-              style={{ gridTemplateColumns: ZONE_GRID }}
-            >
-              {/* Bloc largeur fixe : pastille + code */}
-              <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: ZONE_COLORS[z] }} />
-                <span className="font-cond text-sm font-bold">{z}</span>
-              </span>
-              {/* Nom : tronqué plutôt que passer à la ligne */}
-              <span className="truncate font-cond text-[13px] uppercase tracking-wide text-ink-soft">
-                {def.name}
-              </span>
-              <Mono className="text-right text-[13px]">{paceRangeLabel(vma, z)}</Mono>
-              <Mono className="text-right text-[13px]">{hrLabel(hr.minBpm, hr.maxBpm)}</Mono>
-              <Mono className="text-right text-[13px]">{lapRangeLabel(vma, z)}</Mono>
+            <div key={z} className="border-b border-line last:border-0">
+              <button
+                onClick={() => setExpanded(open ? null : z)}
+                aria-expanded={open}
+                className="grid w-full items-center gap-x-1.5 px-3 py-3 text-left"
+                style={{ gridTemplateColumns: ZONE_GRID }}
+              >
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ZONE_COLORS[z] }} aria-hidden />
+                <span className="whitespace-nowrap font-cond text-sm font-bold">{z}</span>
+                {/* Nom entier, jamais tronqué : la taille s'adapte pour tout faire tenir. */}
+                <span className="whitespace-nowrap font-cond text-[11px] uppercase text-ink-soft">
+                  {def.name}
+                </span>
+                <Mono className="whitespace-nowrap text-right text-sm font-semibold">{paceRangeLabel(vma, z)}</Mono>
+              </button>
+              {open && (
+                <div className="px-3 pb-3 pl-[calc(40px+0.5rem+0.625rem)]">
+                  <Mono className="text-xs text-ink-soft">
+                    FC {hrLabel(hr.minBpm, hr.maxBpm)} bpm · 400 m en {lapRangeLabel(vma, z)}
+                  </Mono>
+                </div>
+              )}
             </div>
           )
         })}
