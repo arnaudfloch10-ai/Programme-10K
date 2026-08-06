@@ -21,7 +21,7 @@ export function Today() {
     <div className="space-y-4 px-4 py-4">
       <header>
         <div className="label">{formatLongDate(today)}</div>
-        <h1 className="font-cond text-2xl font-bold leading-tight">Aujourd'hui</h1>
+        <h1 className="screen-title">Aujourd'hui</h1>
       </header>
 
       <AlertList alerts={alerts} />

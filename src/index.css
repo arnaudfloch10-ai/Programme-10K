@@ -2,24 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Polices auto-hébergées (latin) — aucun appel réseau au runtime. */
+/* Polices auto-hébergées (latin) — aucun appel réseau au runtime.
+   Archivo variable (axes largeur wdth + graisse wght) pour l'interface,
+   JetBrains Mono pour toutes les données chiffrées. */
 @font-face {
-  font-family: 'Playfair Display';
+  font-family: 'Archivo';
   font-style: normal;
-  font-weight: 600 800;
+  font-weight: 400 800;
+  font-stretch: 62.5% 125%;
   font-display: swap;
-  src: url('/fonts/playfair-display-700-latin.woff2') format('woff2');
+  src: url('/fonts/archivo-var-latin.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Cormorant Garamond';
+  font-family: 'JetBrains Mono';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
+  src: url('/fonts/jetbrains-mono-latin.woff2') format('woff2');
 }
 
 :root {
   color-scheme: light;
+  /* Règle globale non négociable : chiffres alignés, hauteur et chasse fixes. */
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
 }
 
 html,
@@ -30,30 +36,19 @@ body,
 
 body {
   @apply bg-paper text-ink font-sans antialiased;
-  /* Cormorant Garamond a un œil petit : on compense taille + graisse pour la
-     lisibilité en extérieur, tout en gardant le rendu serif « luxe ». */
-  font-size: 1.075rem;
-  font-weight: 500;
-  line-height: 1.5;
+  /* Corps : Archivo largeur normale, 15px. */
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.45;
+  font-variation-settings: 'wdth' 100, 'wght' 400;
   /* Safe areas iOS pour la nav du bas. */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
   overscroll-behavior-y: none;
 }
 
-/* Ligatures et proportions raffinées pour le corps serif. */
-.font-sans {
-  font-feature-settings: 'liga' 1, 'kern' 1;
-}
-
-/* Les titres Playfair gagnent en cachet avec un tracking légèrement resserré. */
-.font-cond {
-  letter-spacing: -0.005em;
-}
-
-/* Chiffres tabulaires partout où on affiche du monospace. */
+/* Toutes les données chiffrées : JetBrains Mono, chasse fixe tabulaire. */
 .font-mono {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 /* Cible tactile minimale. */
@@ -66,24 +61,72 @@ body {
   .card {
     @apply border border-line bg-white rounded-md;
   }
-  .label {
-    @apply text-xs uppercase tracking-wide text-ink-soft font-cond;
+
+  /* --- Rôles typographiques (Archivo variable) --- */
+
+  /* Titre d'écran : grotesque athlétique large, 28px. */
+  .screen-title {
+    @apply font-cond uppercase text-ink;
+    font-size: 28px;
+    line-height: 1.05;
+    font-variation-settings: 'wdth' 120, 'wght' 800;
+    letter-spacing: -0.01em;
   }
+  /* Sous-titre d'écran : 13px. */
+  .screen-sub {
+    @apply text-ink-soft;
+    font-size: 13px;
+  }
+  /* Titre de séance : 19px, large 110. */
+  .session-title {
+    @apply font-cond text-ink;
+    font-size: 19px;
+    line-height: 1.15;
+    font-variation-settings: 'wdth' 110, 'wght' 700;
+  }
+  /* Libellé / intitulé de section : 11px, espacé, majuscules. */
+  .label {
+    @apply font-cond uppercase text-ink-soft;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    font-variation-settings: 'wdth' 100, 'wght' 600;
+  }
+
+  /* --- Données chiffrées (JetBrains Mono) --- */
   .num {
-    @apply font-mono tabular-nums;
+    @apply font-mono;
     white-space: nowrap;
   }
-  /* Toute valeur chiffrée suivie d'une unité ne doit jamais se couper. */
+  /* Donnée principale : 22px. */
+  .data-lg {
+    @apply font-mono;
+    font-size: 22px;
+    white-space: nowrap;
+  }
+  /* Donnée secondaire : 14px. */
+  .data-sm {
+    @apply font-mono;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  /* Toute valeur chiffrée + unité ne se coupe jamais. */
   .nowrap {
     white-space: nowrap;
   }
+
   .inp {
-    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-base text-ink;
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-ink;
+    font-size: 16px; /* ≥16px : évite le zoom auto iOS à la saisie */
     min-height: 44px;
   }
   .dark .inp {
     @apply border-[#2a2a2a] bg-[#181818] text-[#ededed];
   }
+}
+
+/* Archivo est la police de titres ET de corps ; on route les alias Tailwind. */
+.font-cond {
+  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Mode sombre (bonus). */

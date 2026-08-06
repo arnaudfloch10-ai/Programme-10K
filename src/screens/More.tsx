@@ -10,7 +10,7 @@ export function More({ onNavigate }: { onNavigate: (s: ScreenId) => void }) {
   return (
     <div className="space-y-4 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Plus</h1>
+        <h1 className="screen-title">Plus</h1>
       </header>
       <div className="space-y-2">
         {ITEMS.map((it) => (

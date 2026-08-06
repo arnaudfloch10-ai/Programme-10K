@@ -23,7 +23,7 @@ export function Zones() {
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Zones</h1>
+        <h1 className="screen-title">Zones</h1>
         <p className="text-sm text-ink-soft">Toutes les allures dérivent de la VMA.</p>
       </header>
 

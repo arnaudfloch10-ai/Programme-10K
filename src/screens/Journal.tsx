@@ -71,7 +71,7 @@ export function Journal() {
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Journal</h1>
+        <h1 className="screen-title">Journal</h1>
         <p className="text-sm text-ink-soft">{logs.filter((l) => l.done).length} séance(s) enregistrée(s)</p>
       </header>
 

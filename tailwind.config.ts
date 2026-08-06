@@ -24,14 +24,12 @@ export default {
         danger: '#a32e3d',
       },
       fontFamily: {
-        // Direction serif luxe. Titres : Playfair Display (haute-contraste,
-        // signature). Corps : Cormorant Garamond (serif élégant).
-        // Allures/temps/FC : monospace OBLIGATOIRE (alignement des chiffres).
-        cond: ['"Playfair Display"', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        sans: ['"Cormorant Garamond"', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        mono: ['"Roboto Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        // Direction « premium sport ». Interface et titres : Archivo (grotesque
+        // variable, axes largeur + graisse). Données chiffrées : JetBrains Mono.
+        cond: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Archivo', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
   },

@@ -40,7 +40,7 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Réglages</h1>
+        <h1 className="screen-title">Réglages</h1>
       </header>
 
       <div className="card space-y-3 p-4">

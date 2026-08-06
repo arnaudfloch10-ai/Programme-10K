@@ -30,7 +30,7 @@ export function Plan() {
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Plan</h1>
+        <h1 className="screen-title">Plan</h1>
         <p className="text-sm text-ink-soft">Bloc 0 — 9 semaines · 3 août → 4 octobre 2026</p>
       </header>
 

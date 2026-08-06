@@ -61,7 +61,7 @@ export function Measures() {
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Mesures</h1>
+        <h1 className="screen-title">Mesures</h1>
         <p className="text-sm text-ink-soft">Au réveil, à jeun. Taille de référence : {profile.heightCm} cm.</p>
       </header>
 
