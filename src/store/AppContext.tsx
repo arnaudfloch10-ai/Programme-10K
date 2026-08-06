@@ -4,7 +4,9 @@ import * as repo from '../db/repo'
 import type { ExportBundle } from '../db/repo'
 import { computeAlerts, type Alert, type Z2Sample } from '../lib/alerts'
 import { findWeekForDate, weekDoneKm } from '../lib/plan'
-import { parseISODate, todayISO } from '../lib/format'
+import { parseISODate, todayISO, daysBetween } from '../lib/format'
+
+const EXPORT_REMINDER_DAYS = 28 // rappel d'export toutes les 4 semaines
 
 interface AppState {
   loading: boolean
@@ -24,6 +26,8 @@ interface AppState {
   deleteMeasurement: (date: string) => Promise<void>
   exportAll: () => Promise<ExportBundle>
   importAll: (b: ExportBundle) => Promise<void>
+  markExported: () => Promise<void>
+  exportReminderDue: boolean
 }
 
 const Ctx = createContext<AppState | null>(null)
@@ -35,6 +39,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<LoggedSession[]>([])
   const [measurements, setMeasurements] = useState<Measurement[]>([])
   const [vmaTests, setVmaTests] = useState<VmaTest[]>([])
+  const [lastExportAt, setLastExportAt] = useState<string | undefined>()
+  const [firstLaunchAt, setFirstLaunchAt] = useState<string | undefined>()
   const today = todayISO()
 
   const reload = useCallback(async () => {
@@ -55,10 +61,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     ;(async () => {
       await repo.ensureSeeded()
+      // Persistance du stockage : demande au navigateur de ne pas évincer l'IndexedDB.
+      try {
+        await navigator.storage?.persist?.()
+      } catch {
+        /* non supporté : sans effet */
+      }
+      await repo.ensureFirstLaunch(todayISO())
+      const meta = await repo.getExportMeta()
+      setFirstLaunchAt(meta.firstLaunchAt)
+      setLastExportAt(meta.lastExportAt)
       await reload()
       setLoading(false)
     })()
   }, [reload])
+
+  const markExported = useCallback(async () => {
+    const d = todayISO()
+    await repo.setLastExport(d)
+    setLastExportAt(d)
+  }, [])
 
   const saveProfile = useCallback(
     async (p: Profile) => {
@@ -104,10 +126,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const importAll = useCallback(
     async (b: ExportBundle) => {
       await repo.importAll(b)
+      const meta = await repo.getExportMeta()
+      setLastExportAt(meta.lastExportAt)
       await reload()
     },
     [reload],
   )
+
+  // Rappel d'export toutes les 4 semaines (référence : dernier export, sinon 1er lancement).
+  const exportReminderDue = useMemo(() => {
+    const ref = lastExportAt ?? firstLaunchAt
+    if (!ref) return false
+    return daysBetween(ref, today) >= EXPORT_REMINDER_DAYS
+  }, [lastExportAt, firstLaunchAt, today])
 
   // Alertes dérivées.
   const alerts = useMemo<Alert[]>(() => {
@@ -152,6 +183,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteMeasurement,
     exportAll,
     importAll,
+    markExported,
+    exportReminderDue,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

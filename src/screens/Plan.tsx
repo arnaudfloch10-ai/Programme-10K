@@ -87,18 +87,15 @@ export function Plan() {
         <div className="space-y-2">
           {BLOCK_MILESTONES.map((b) => (
             <div key={b.block} className="card border-dashed p-3">
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-2">
                 <div className="font-cond text-sm font-bold">
                   Bloc {b.block} · {b.title}
                 </div>
-                <div className="text-xs text-ink-soft">{formatDateRange(b.startDate, b.endDate)}</div>
+                <div className="num shrink-0 text-xs text-ink-soft">{b.volume}</div>
               </div>
+              <div className="num mt-0.5 text-xs text-ink-soft">{b.period}</div>
               <p className="mt-1 text-xs text-ink-soft">{b.focus}</p>
-              {b.keyEvent && (
-                <p className="mt-1 text-xs font-semibold">
-                  🎯 {b.keyEvent}
-                </p>
-              )}
+              {b.keyEvent && <p className="mt-1 text-xs font-semibold">🎯 {b.keyEvent}</p>}
             </div>
           ))}
         </div>

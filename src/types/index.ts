@@ -46,6 +46,15 @@ export interface Session {
   strength?: 'A' | 'B' // séance de renfo associée
   isQuality?: boolean // séance de qualité (compte dans la limite de 2/sem)
   raceConsigne?: string // consigne de course affichée le jour J
+  warmupNote?: string // détail d'échauffement (gammes, progressives…)
+  raceSegments?: RaceSegment[] // plan de course par tronçons de km
+}
+
+export interface RaceSegment {
+  label: string // "km 1–3", "km 8–10"
+  zone?: ZoneId
+  zonePosition?: 'bas' | 'milieu' | 'haut'
+  free?: boolean // tronçon libre, sans allure imposée
 }
 
 export interface Week {
@@ -100,7 +109,9 @@ export interface BlockMilestone {
   title: string
   startDate: string
   endDate: string
+  period: string // libellé lisible de la période
   focus: string
+  volume: string // ex. "37 → 46 km", "−40 %"
   keyEvent?: string
 }
 

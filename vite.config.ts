@@ -21,7 +21,7 @@ export default defineConfig(({ command }) => {
           name: 'Programme 10 km',
           short_name: '10K',
           description: "Suivi d'entraînement running — allures dérivées de la VMA, hors ligne",
-          theme_color: '#111111',
+          theme_color: '#f7f7f5',
           background_color: '#f7f7f5',
           display: 'standalone',
           orientation: 'portrait',

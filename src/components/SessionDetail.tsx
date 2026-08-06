@@ -52,12 +52,6 @@ export function SessionDetail({ session, vma }: { session: Session; vma: number 
       )}
 
       {session.note && <p className="pt-1 text-xs italic text-ink-soft">{session.note}</p>}
-
-      {session.strength && (
-        <div className="pt-1 text-xs text-ink-soft">
-          + Renforcement <span className="font-semibold">{session.strength}</span>
-        </div>
-      )}
     </div>
   )
 }

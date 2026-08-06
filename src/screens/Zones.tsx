@@ -6,6 +6,7 @@ import { computeVmaTest, type VmaTestInput } from '../lib/vma'
 import { formatShortDate, todayISO } from '../lib/format'
 import type { VmaTestType } from '../types'
 import { Mono } from '../components/ui'
+import { downloadBundle } from '../lib/exportFile'
 
 // Grille à colonnes fixes : les colonnes restent alignées d'une ligne à l'autre.
 const ZONE_GRID = '2.5rem minmax(0, 1fr) 5.75rem 3.5rem 4.5rem'
@@ -130,7 +131,8 @@ const TYPE_LABELS: Record<VmaTestType, string> = {
   course: 'Course',
 }
 
-function VmaTestForm({ onApply }: { onApply: (v: number, test: import('../types').VmaTest) => void }) {
+function VmaTestForm({ onApply }: { onApply: (v: number, test: import('../types').VmaTest) => Promise<void> }) {
+  const { exportAll, markExported } = useApp()
   const [open, setOpen] = useState(false)
   const [type, setType] = useState<VmaTestType>('demi-cooper')
   const [distanceM, setDistanceM] = useState('')
@@ -209,8 +211,12 @@ function VmaTestForm({ onApply }: { onApply: (v: number, test: import('../types'
 
       <button
         disabled={!valid}
-        onClick={() => {
-          onApply(preview.computedVma, preview)
+        onClick={async () => {
+          await onApply(preview.computedVma, preview)
+          // Sauvegarde automatique à chaque saisie de test VMA.
+          const bundle = await exportAll()
+          downloadBundle(bundle)
+          await markExported()
           setOpen(false)
           setDistanceM('')
           setRaceDistanceM('')
@@ -220,6 +226,7 @@ function VmaTestForm({ onApply }: { onApply: (v: number, test: import('../types'
       >
         Appliquer cette VMA
       </button>
+      <p className="text-[11px] text-ink-soft">Un export JSON de sauvegarde est déclenché automatiquement.</p>
     </div>
   )
 }

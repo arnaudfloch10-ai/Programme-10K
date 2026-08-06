@@ -3,9 +3,12 @@ import { useApp } from '../store/AppContext'
 import { findWeekForDate, sessionForDate, findLog } from '../lib/plan'
 import { formatLongDate, daysBetween } from '../lib/format'
 import { SessionDetail } from '../components/SessionDetail'
+import { RacePlan } from '../components/RacePlan'
+import { StrengthDetail } from '../components/StrengthDetail'
 import { AlertList } from '../components/AlertBanner'
 import { Mono } from '../components/ui'
 import { LogForm } from './LogForm'
+import { routineForStrength } from '../data/strength'
 import { derivedPaces, formatPace } from '../lib/zones'
 
 export function Today() {
@@ -43,12 +46,17 @@ export function Today() {
         </div>
       )}
 
-      {session && session.type !== 'REPOS' && (
+      {/* Séance de renfo seule (jour de Renfo B) : uniquement la routine. */}
+      {session && session.type === 'RENFO' && (
+        <StrengthDetail routine={routineForStrength('B')} renfoSessionId={session.id} date={today} currentWeekNumber={week?.number} />
+      )}
+
+      {session && session.type !== 'REPOS' && session.type !== 'RENFO' && (
         <div className="card p-4">
           <div className="mb-3 flex items-start justify-between gap-2">
             <div>
               <div className="label">Semaine {week?.number} · {session.type}</div>
-              <h2 className="font-cond text-xl font-bold leading-tight">{session.title}</h2>
+              <h2 className="session-title">{session.title}</h2>
               <div className="num mt-0.5 text-sm text-ink-soft">{session.totalKm} km</div>
             </div>
             {log?.done && (
@@ -56,7 +64,11 @@ export function Today() {
             )}
           </div>
 
-          <SessionDetail session={session} vma={profile.vma} />
+          {session.type === 'COURSE' ? (
+            <RacePlan session={session} vma={profile.vma} />
+          ) : (
+            <SessionDetail session={session} vma={profile.vma} />
+          )}
 
           <button
             onClick={() => setLogging(true)}
@@ -65,6 +77,25 @@ export function Today() {
             {log?.done ? 'Modifier le log' : 'Marquer faite'}
           </button>
         </div>
+      )}
+
+      {/* Renfo A associé à une séance d'endurance (mercredi). */}
+      {session && session.strength === 'A' && (
+        <StrengthDetail
+          routine={routineForStrength('A')}
+          renfoSessionId={`${session.id}#renfoA`}
+          date={today}
+          currentWeekNumber={week?.number}
+        />
+      )}
+      {/* Renfo B rattaché à une séance d'endurance (cas S9 mercredi). */}
+      {session && session.strength === 'B' && session.type !== 'RENFO' && (
+        <StrengthDetail
+          routine={routineForStrength('B')}
+          renfoSessionId={`${session.id}#renfoB`}
+          date={today}
+          currentWeekNumber={week?.number}
+        />
       )}
 
       {/* Repères d'allure toujours dérivés de la VMA courante. */}
