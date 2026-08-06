@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useApp } from '../store/AppContext'
-import { findWeekForDate, dateForSession, weekDoneKm, weekPlannedKm, findLog } from '../lib/plan'
+import { findWeekForDate, dateForSession, weekDoneKm, weekPlannedKm, findLog, prescribedZone } from '../lib/plan'
 import { checkQualitySpacing } from '../lib/alerts'
+import { paceRangeLabel } from '../lib/sessionPace'
 import { formatDateRange, formatKm } from '../lib/format'
-import { ZoneBadge, Mono } from '../components/ui'
+import { ZONE_COLORS } from '../lib/zones'
+import { Mono } from '../components/ui'
 import { LogForm } from './LogForm'
 import type { Session } from '../types'
 
 const DOW_LABEL = ['', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
 export function WeekView() {
-  const { weeks, logs, today } = useApp()
+  const { weeks, logs, today, profile } = useApp()
   const current = findWeekForDate(weeks, today)
   const initialIdx = current ? weeks.findIndex((w) => w.number === current.number) : 0
   const [idx, setIdx] = useState(Math.max(0, initialIdx))
@@ -97,11 +99,20 @@ export function WeekView() {
                   <span className="truncate font-cond text-sm font-semibold">{s.title}</span>
                   {s.isQuality && <span className="shrink-0 rounded bg-ink px-1 text-[10px] font-bold text-paper">Q</span>}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-ink-soft">
-                  {s.steadyZone && <ZoneBadge zone={s.steadyZone} />}
-                  {s.totalKm > 0 && <Mono className="text-xs">{formatKm(s.totalKm)} km</Mono>}
-                  {s.strength && <span>Renfo {s.strength}</span>}
-                </div>
+                {/* Allure visible sans ouvrir la séance. */}
+                {!isRest && (
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-soft">
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: ZONE_COLORS[prescribedZone(s)] }}
+                      aria-hidden
+                    />
+                    <span className="font-cond text-[11px] font-bold">{prescribedZone(s)}</span>
+                    <Mono className="text-xs">{paceRangeLabel(profile.vma, prescribedZone(s))}</Mono>
+                    <span className="whitespace-nowrap">/km</span>
+                  </div>
+                )}
+                {s.strength && <div className="mt-0.5 text-xs text-ink-soft">Renfo {s.strength}</div>}
               </div>
               {!isRest && (
                 <div className="shrink-0 text-right">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 import { useApp } from '../store/AppContext'
 import { bodyFatNavyMale } from '../lib/navy'
-import { formatShortDate, todayISO } from '../lib/format'
+import { formatShortDate, formatLongDate, todayISO } from '../lib/format'
 import type { Measurement } from '../types'
 import { Mono } from '../components/ui'
 
@@ -61,7 +61,7 @@ export function Measures() {
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Mesures</h1>
+        <h1 className="screen-title">Mesures</h1>
         <p className="text-sm text-ink-soft">Au réveil, à jeun. Taille de référence : {profile.heightCm} cm.</p>
       </header>
 
@@ -69,6 +69,7 @@ export function Measures() {
         <label className="block">
           <span className="label">Date</span>
           <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setF({}) }} className="inp mt-1" />
+          <span className="mt-1 block text-xs text-ink-soft">{formatLongDate(date)}</span>
         </label>
         <div className="grid grid-cols-2 gap-3">
           <G label="Poids (kg)" value={cur.weightKg} onChange={(v) => setF((s) => ({ ...s, weightKg: v }))} />

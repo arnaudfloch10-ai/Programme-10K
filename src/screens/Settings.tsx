@@ -3,9 +3,12 @@ import { useApp } from '../store/AppContext'
 import type { Profile } from '../types'
 import type { ExportBundle } from '../db/repo'
 import { formatPace } from '../lib/zones'
+import { formatLongDate } from '../lib/format'
+import { AlertsTest } from '../components/AlertsTest'
+import { downloadBundle } from '../lib/exportFile'
 
 export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: () => void }) {
-  const { profile, saveProfile, exportAll, importAll } = useApp()
+  const { profile, saveProfile, exportAll, importAll, markExported, exportReminderDue } = useApp()
   const [p, setP] = useState<Profile>(profile)
   const [msg, setMsg] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -14,13 +17,8 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
 
   async function handleExport() {
     const bundle = await exportAll()
-    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `programme-10k-${bundle.exportedAt.slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadBundle(bundle)
+    await markExported()
   }
 
   async function handleImport(file: File) {
@@ -39,7 +37,7 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Réglages</h1>
+        <h1 className="screen-title">Réglages</h1>
       </header>
 
       <div className="card space-y-3 p-4">
@@ -53,7 +51,7 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
         </div>
         <div className="rounded-md bg-paper p-2 text-xs text-ink-soft">
           À VMA {p.vma} km/h : allure 10 km <span className="num font-bold">{formatPace(3600 / (p.vma * 0.88))}</span>/km ·
-          objectif {p.goalRaceName} le {p.goalRaceDate} ({formatPace(p.goalTimeS / 10)}/km cible).
+          objectif {p.goalRaceName} le {formatLongDate(p.goalRaceDate)} ({formatPace(p.goalTimeS / 10)}/km cible).
         </div>
         <button
           onClick={async () => {
@@ -65,6 +63,12 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
           Enregistrer le profil
         </button>
       </div>
+
+      {exportReminderDue && (
+        <div className="rounded-md border-l-4 border-z4 bg-z4/10 p-3 text-sm">
+          Plus de 4 semaines sans sauvegarde. Pense à exporter tes données en JSON.
+        </div>
+      )}
 
       <div className="card space-y-3 p-4">
         <div className="label">Données (tout reste sur cet appareil)</div>
@@ -88,6 +92,11 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
           />
         </div>
         <p className="text-[11px] text-ink-soft">L'import remplace intégralement les données actuelles.</p>
+      </div>
+
+      <div>
+        <div className="label mb-2">Vérification des alertes</div>
+        <AlertsTest />
       </div>
 
       <div className="card flex items-center justify-between p-4">

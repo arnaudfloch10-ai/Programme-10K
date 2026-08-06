@@ -61,3 +61,5 @@ export function getDB(): Promise<IDBPDatabase<AppDB>> {
 
 export const PROFILE_KEY = 'profile'
 export const SEEDED_KEY = 'seeded'
+export const FIRST_LAUNCH_KEY = 'firstLaunchAt'
+export const LAST_EXPORT_KEY = 'lastExportAt'

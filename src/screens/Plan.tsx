@@ -23,10 +23,14 @@ export function Plan() {
     label: w.label,
   }))
 
+  // Plafond d'axe : ~10 % de marge, arrondi au multiple de 5 supérieur.
+  const maxKm = data.reduce((m, d) => Math.max(m, d.km), 0)
+  const axisMax = Math.max(Math.round((maxKm * 1.1) / 5) * 5, Math.ceil(maxKm / 5) * 5)
+
   return (
     <div className="space-y-5 px-4 py-4">
       <header>
-        <h1 className="font-cond text-2xl font-bold">Plan</h1>
+        <h1 className="screen-title">Plan</h1>
         <p className="text-sm text-ink-soft">Bloc 0 — 9 semaines · 3 août → 4 octobre 2026</p>
       </header>
 
@@ -36,7 +40,7 @@ export function Plan() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 16, right: 4, left: -16, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis domain={[0, axisMax]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <Bar dataKey="km" radius={[2, 2, 0, 0]}>
                 <LabelList dataKey="km" position="top" style={{ fontSize: 10, fill: '#4a4a4a' }} />
                 {data.map((d, i) => (
@@ -83,18 +87,15 @@ export function Plan() {
         <div className="space-y-2">
           {BLOCK_MILESTONES.map((b) => (
             <div key={b.block} className="card border-dashed p-3">
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline justify-between gap-2">
                 <div className="font-cond text-sm font-bold">
                   Bloc {b.block} · {b.title}
                 </div>
-                <div className="text-xs text-ink-soft">{formatDateRange(b.startDate, b.endDate)}</div>
+                <div className="num shrink-0 text-xs text-ink-soft">{b.volume}</div>
               </div>
+              <div className="num mt-0.5 text-xs text-ink-soft">{b.period}</div>
               <p className="mt-1 text-xs text-ink-soft">{b.focus}</p>
-              {b.keyEvent && (
-                <p className="mt-1 text-xs font-semibold">
-                  🎯 {b.keyEvent}
-                </p>
-              )}
+              {b.keyEvent && <p className="mt-1 text-xs font-semibold">🎯 {b.keyEvent}</p>}
             </div>
           ))}
         </div>

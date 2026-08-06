@@ -16,6 +16,23 @@ export function resolvePace(vma: number, zone: ZoneId, position?: ZonePosition):
   return zonePace(vma, zone, position ?? 'milieu')
 }
 
+/**
+ * Plage d'allures d'une zone, TOUJOURS du plus lent au plus rapide (ex. "8:00–6:51").
+ * Retourne null pour FORCE/REST.
+ */
+export function paceRangeLabel(vma: number, zone: ZoneId): string | null {
+  if (!isTrainingZone(zone)) return null
+  const r = zonePaceRange(vma, zone)
+  return `${formatPace(r.slowS)}–${formatPace(r.fastS)}`
+}
+
+/** Plage de temps au tour de 400 m, du plus lent au plus rapide (ex. "3:12–2:45"). */
+export function lapRangeLabel(vma: number, zone: ZoneId): string | null {
+  if (!isTrainingZone(zone)) return null
+  const r = zonePaceRange(vma, zone)
+  return `${formatDuration(r.slowS / 2.5)}–${formatDuration(r.fastS / 2.5)}`
+}
+
 export interface ResolvedInterval {
   raw: Interval
   /** Libellé de l'effort : "8×800 m", "3×10'", "6×20\"". */
@@ -66,17 +83,25 @@ export function resolveInterval(vma: number, iv: Interval): ResolvedInterval {
     raw: iv,
     effortLabel: iv.label ? `${effortLabel(iv)} ${iv.label}` : effortLabel(iv),
     paceLabel: pace != null ? formatPace(pace) : null,
-    rangeLabel: range ? `${formatPace(range.fastS)}–${formatPace(range.slowS)}` : null,
+    // Plage toujours du plus lent au plus rapide.
+    rangeLabel: range ? `${formatPace(range.slowS)}–${formatPace(range.fastS)}` : null,
     zone: iv.zone,
     recoveryLabel: recoveryLabel(iv),
   }
 }
 
+export interface ResolvedBlock {
+  km: number
+  zone: ZoneId
+  pace: string | null
+  range: string | null
+}
+
 export interface ResolvedSession {
-  warmup: { km: number; zone: ZoneId; pace: string | null } | null
-  steady: { km: number; zone: ZoneId; pace: string | null } | null
+  warmup: ResolvedBlock | null
+  steady: ResolvedBlock | null
   intervals: ResolvedInterval[]
-  cooldown: { km: number } | null
+  cooldown: ResolvedBlock | null
 }
 
 /** Résout toute une séance pour l'affichage détaillé (écran Aujourd'hui / Semaine). */
@@ -88,6 +113,7 @@ export function resolveSession(vma: number, s: Session): ResolvedSession {
             km: s.warmupKm,
             zone: s.warmupZone ?? 'Z2',
             pace: resolvePaceLabel(vma, s.warmupZone ?? 'Z2'),
+            range: paceRangeLabel(vma, s.warmupZone ?? 'Z2'),
           }
         : null,
     steady:
@@ -96,10 +122,14 @@ export function resolveSession(vma: number, s: Session): ResolvedSession {
             km: s.steadyKm,
             zone: s.steadyZone ?? 'Z2',
             pace: resolvePaceLabel(vma, s.steadyZone ?? 'Z2', s.steadyZonePosition),
+            range: paceRangeLabel(vma, s.steadyZone ?? 'Z2'),
           }
         : null,
     intervals: (s.intervals ?? []).map((iv) => resolveInterval(vma, iv)),
-    cooldown: s.cooldownKm != null ? { km: s.cooldownKm } : null,
+    cooldown:
+      s.cooldownKm != null
+        ? { km: s.cooldownKm, zone: 'Z1', pace: resolvePaceLabel(vma, 'Z1'), range: paceRangeLabel(vma, 'Z1') }
+        : null,
   }
 }
 

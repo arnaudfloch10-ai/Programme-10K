@@ -405,11 +405,15 @@ const S9: Week = {
       title: '10 km de St-Maur',
       warmupKm: 2.5,
       warmupZone: 'Z2',
-      intervals: [{ reps: 1, distanceM: 10000, zone: 'Z4', label: 'course' }],
+      warmupNote: 'gammes + 4 × 20" progressives',
       cooldownKm: 1.5,
       totalKm: 14,
-      raceConsigne:
-        'km 1–3 en Z3 haut · km 4–7 en Z4 · km 8–10 libre. Négative split obligatoire, aucun chrono recherché.',
+      raceSegments: [
+        { label: 'km 1–3', zone: 'Z3', zonePosition: 'haut' },
+        { label: 'km 4–7', zone: 'Z4', zonePosition: 'milieu' },
+        { label: 'km 8–10', free: true },
+      ],
+      raceConsigne: 'Négative split obligatoire, aucun chrono recherché.',
       note: 'Course-test intermédiaire. Objectif : gestion d\'allure, pas de chrono.',
     },
   ],
@@ -417,35 +421,43 @@ const S9: Week = {
 
 export const BLOC0_WEEKS: Week[] = [S1, S2, S3, S4, S5, S6, S7, S8, S9]
 
-// Blocs 1 à 4 — non détaillés, affichés comme jalons dans la vue macro.
+// Blocs 1 à 4 — non détaillés, affichés comme jalons (lecture seule) dans la vue macro.
 export const BLOCK_MILESTONES: BlockMilestone[] = [
   {
     block: 1,
-    title: 'Reprise & seuil',
+    title: 'Aérobie / force',
     startDate: '2026-10-05',
-    endDate: '2026-12-06',
-    focus: 'Réendurance post-St-Maur, consolidation du seuil.',
+    endDate: '2027-01-03',
+    period: '5 oct 2026 → 3 janv 2027',
+    focus: 'Base foncière, seuil long, côtes.',
+    volume: '37 → 46 km',
   },
   {
     block: 2,
-    title: 'Puissance aérobie',
-    startDate: '2026-12-07',
-    endDate: '2027-02-07',
-    focus: 'VMA courte et longue, renforcement hivernal.',
+    title: 'Seuil / VMA',
+    startDate: '2027-01-04',
+    endDate: '2027-03-14',
+    period: '4 janv → 14 mars 2027',
+    focus: 'Élever la VMA et le % de VMA soutenable.',
+    volume: '46 → 52 km',
   },
   {
     block: 3,
-    title: 'Spécifique 10 km',
-    startDate: '2027-02-08',
-    endDate: '2027-04-11',
-    focus: 'Allure course 10 km, tolérance lactique.',
+    title: 'Spécifique',
+    startDate: '2027-03-15',
+    endDate: '2027-05-09',
+    period: '15 mars → 9 mai 2027',
+    focus: 'Automatiser l\'allure cible.',
+    volume: '52 → 44 km',
   },
   {
     block: 4,
-    title: 'Affûtage & objectif',
-    startDate: '2027-04-12',
+    title: 'Affûtage',
+    startDate: '2027-05-10',
     endDate: '2027-05-23',
-    focus: 'Affûtage progressif vers l\'objectif.',
+    period: '10 → 23 mai 2027',
+    focus: 'Fraîcheur, maintien de l\'intensité.',
+    volume: '−40 %',
     keyEvent: '10 km de Vincennes — 23 mai 2027, cible 48\'30".',
   },
 ]

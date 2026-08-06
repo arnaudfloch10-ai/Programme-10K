@@ -1,5 +1,5 @@
 import type { LoggedSession, Measurement, Profile, VmaTest, Week } from '../types'
-import { getDB, PROFILE_KEY, SEEDED_KEY } from './db'
+import { getDB, PROFILE_KEY, SEEDED_KEY, FIRST_LAUNCH_KEY, LAST_EXPORT_KEY } from './db'
 import { BLOC0_WEEKS } from '../data/seedBloc0'
 import { DEFAULT_PROFILE } from '../data/profile'
 
@@ -22,6 +22,28 @@ export async function setVma(vma: number): Promise<Profile> {
   const next = { ...p, vma }
   await saveProfile(next)
   return next
+}
+
+// --- Métadonnées de sauvegarde ---
+
+export async function getExportMeta(): Promise<{ firstLaunchAt?: string; lastExportAt?: string }> {
+  const db = await getDB()
+  const [firstLaunchAt, lastExportAt] = await Promise.all([
+    db.get('settings', FIRST_LAUNCH_KEY) as Promise<string | undefined>,
+    db.get('settings', LAST_EXPORT_KEY) as Promise<string | undefined>,
+  ])
+  return { firstLaunchAt, lastExportAt }
+}
+
+export async function ensureFirstLaunch(todayISO: string): Promise<void> {
+  const db = await getDB()
+  const existing = await db.get('settings', FIRST_LAUNCH_KEY)
+  if (!existing) await db.put('settings', todayISO, FIRST_LAUNCH_KEY)
+}
+
+export async function setLastExport(todayISO: string): Promise<void> {
+  const db = await getDB()
+  await db.put('settings', todayISO, LAST_EXPORT_KEY)
 }
 
 // --- Plan / semaines ---

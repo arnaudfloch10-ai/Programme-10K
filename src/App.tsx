@@ -6,6 +6,7 @@ import { Today } from './screens/Today'
 import { WeekView } from './screens/WeekView'
 import { Plan } from './screens/Plan'
 import { Zones } from './screens/Zones'
+import { More } from './screens/More'
 import { Journal } from './screens/Journal'
 import { Measures } from './screens/Measures'
 import { Settings } from './screens/Settings'
@@ -36,6 +37,7 @@ function Shell() {
         {screen === 'week' && <WeekView />}
         {screen === 'plan' && <Plan />}
         {screen === 'zones' && <Zones />}
+        {screen === 'more' && <More onNavigate={setScreen} />}
         {screen === 'journal' && <Journal />}
         {screen === 'measures' && <Measures />}
         {screen === 'settings' && <Settings dark={dark} onToggleDark={() => setDark((d) => !d)} />}
