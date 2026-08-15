@@ -48,7 +48,12 @@ export function ReprisePlan() {
                     VMA mesurée — transmettre le résultat au coach pour la suite du plan.
                   </span>
                 ) : (
-                  <span className="text-ink-soft">🔒 {b.messageVerrouille}</span>
+                  <span className="text-ink-soft">
+                    <span className="mr-2 rounded border border-line px-1.5 py-0.5 align-middle font-cond text-[10px] font-bold uppercase tracking-wide">
+                      À définir
+                    </span>
+                    {b.messageVerrouille}
+                  </span>
                 )}
               </div>
             )}

@@ -29,7 +29,7 @@ export const REPRISE_PLAN: ReprisePlan = {
           seances: [
             { id: 's1-1', jourSuggere: 'mardi', type: 'EF', contenu: '30 min continu', dureeMin: 30, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: null },
             { id: 's1-2', jourSuggere: 'jeudi', type: 'EF', contenu: '30 min continu', dureeMin: 30, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: null },
-            { id: 's1-3', jourSuggere: 'dimanche', type: 'EF', contenu: '35 min continu', dureeMin: 35, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: null },
+            { id: 's1-3', jourSuggere: 'dimanche', type: 'EF', contenu: '35 min continu', dureeMin: 35, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: "Fourchette d'allure plus large : sortie longue, dérive cardiaque attendue en fin de séance. Piloter à la FC, pas à l'allure." },
           ],
         },
         {
@@ -41,7 +41,7 @@ export const REPRISE_PLAN: ReprisePlan = {
           seances: [
             { id: 's2-1', jourSuggere: 'mardi', type: 'EF', contenu: '30 min continu', dureeMin: 30, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: null },
             { id: 's2-2', jourSuggere: 'jeudi', type: 'EF + cadence', contenu: '35 min continu, dont 10 min finales à 160 ppm', dureeMin: 35, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: 'Métronome ou playlist à 160 bpm sur les 10 dernières minutes' },
-            { id: 's2-3', jourSuggere: 'dimanche', type: 'EF', contenu: '40 min continu', dureeMin: 40, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: null },
+            { id: 's2-3', jourSuggere: 'dimanche', type: 'EF', contenu: '40 min continu', dureeMin: 40, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: "Fourchette d'allure plus large : sortie longue, dérive cardiaque attendue en fin de séance. Piloter à la FC, pas à l'allure." },
           ],
         },
         {
@@ -53,7 +53,7 @@ export const REPRISE_PLAN: ReprisePlan = {
           seances: [
             { id: 's3-1', jourSuggere: 'mardi', type: 'EF', contenu: '35 min continu', dureeMin: 35, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: null },
             { id: 's3-2', jourSuggere: 'jeudi', type: 'EF + lignes droites', contenu: '35 min EF + 4 × 20" lignes droites, récup 1\'40" marche', dureeMin: 43, fcCible: { min: 140, max: 152 }, allureCible: '8:30-9:00', note: '20" ne sollicite pas la filière lactique : travail neuromusculaire pur' },
-            { id: 's3-3', jourSuggere: 'dimanche', type: 'EF', contenu: '45 min continu', dureeMin: 45, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: null },
+            { id: 's3-3', jourSuggere: 'dimanche', type: 'EF', contenu: '45 min continu', dureeMin: 45, fcCible: { min: 140, max: 155 }, allureCible: '8:15-9:00', note: "Fourchette d'allure plus large : sortie longue, dérive cardiaque attendue en fin de séance. Piloter à la FC, pas à l'allure." },
           ],
         },
         {
