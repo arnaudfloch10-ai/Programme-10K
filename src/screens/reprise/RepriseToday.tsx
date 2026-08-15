@@ -50,7 +50,7 @@ export function RepriseToday() {
       </button>
 
       {/* Fourchette de travail par défaut + consigne clé de la semaine. */}
-      <div className="rounded-md p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, white)' }}>
+      <div className="rounded-md p-3" style={{ backgroundColor: 'var(--accent-tint)' }}>
         <div className="flex items-baseline justify-between">
           <span className="label">Fourchette par défaut</span>
           <Mono className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
@@ -67,6 +67,7 @@ export function RepriseToday() {
           onOpenTest={() => setTest(true)}
           onLog={() => setLogSeance(todaySeance)}
           realisee={realiseeOf(todaySeance.id)}
+          highlight
         />
       ) : (
         <div className="card p-4">

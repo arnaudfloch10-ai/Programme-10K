@@ -28,17 +28,19 @@ function Shell() {
   // Le sélecteur s'affiche à chaque lancement (dernier profil présélectionné),
   // et à la demande via le chip. `entered` = l'utilisateur a validé son choix.
   const [entered, setEntered] = useState(false)
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
 
+  // Thème = propriété du profil actif. Basculer de profil bascule le thème :
+  // data-theme applique le jeu de tokens, --accent porte l'accent du profil,
+  // et meta theme-color / barre d'état se synchronisent avec le fond du thème.
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-    localStorage.setItem('theme', dark ? 'dark' : 'light')
-  }, [dark])
-
-  // Accent du profil actif (seul différenciateur visuel).
-  useEffect(() => {
-    if (profil) document.documentElement.style.setProperty('--accent', profil.accentColor)
+    if (!profil) return
+    document.documentElement.dataset.theme = profil.theme
+    document.documentElement.style.setProperty('--accent', profil.accentColor)
+    const dark = profil.theme === 'dark-rose'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#f7f7f5')
+    document
+      .querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+      ?.setAttribute('content', dark ? 'black-translucent' : 'default')
   }, [profil])
 
   if (loading) {
@@ -65,7 +67,7 @@ function Shell() {
   }
 
   const fc = profil?.pilotage === 'fc'
-  const settings = <Settings dark={dark} onToggleDark={() => setDark((d) => !d)} />
+  const settings = <Settings />
 
   return (
     <div className="mx-auto flex min-h-full max-w-xl flex-col">

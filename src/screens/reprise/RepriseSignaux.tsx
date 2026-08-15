@@ -18,7 +18,7 @@ export function RepriseSignaux() {
         <h1 className="screen-title">Signaux d'alerte</h1>
       </header>
 
-      <div className="rounded-md border-l-4 border-danger bg-danger/10 p-4">
+      <div className="rounded-md border border-l-4 border-line bg-surface p-4" style={{ borderLeftColor: 'var(--alert-high)' }}>
         <div className="font-cond text-sm font-bold uppercase tracking-wide text-danger">
           Arrêt immédiat et consultation si
         </div>
@@ -39,17 +39,17 @@ export function RepriseSignaux() {
           <span className="font-cond text-sm font-semibold">{chaussure.nom}</span>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <Mono className="data-lg font-bold" style={{ color: aRemplacer ? '#a32e3d' : 'var(--accent)' }}>
+          <Mono className="data-lg font-bold" style={aRemplacer ? { color: 'var(--alert-high)' } : undefined}>
             {formatKm(kmCumul)}
           </Mono>
           <span className="text-sm text-ink-soft">
             km cumulés · remplacer entre {chaussure.seuilMinKm} et {chaussure.seuilMaxKm} km
           </span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-line/50">
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
           <div
             className="h-full rounded-full"
-            style={{ width: `${pct}%`, backgroundColor: aRemplacer ? '#a32e3d' : 'var(--accent, #141414)' }}
+            style={{ width: `${pct}%`, backgroundColor: aRemplacer ? 'var(--alert-high)' : 'var(--accent)' }}
           />
         </div>
         {aRemplacer && (

@@ -7,7 +7,7 @@ import { formatLongDate } from '../lib/format'
 import { AlertsTest } from '../components/AlertsTest'
 import { downloadBundle } from '../lib/exportFile'
 
-export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: () => void }) {
+export function Settings() {
   const { profile, saveProfile, exportAll, importAll, markExported, exportReminderDue } = useApp()
   const [p, setP] = useState<Profile>(profile)
   const [msg, setMsg] = useState<string | null>(null)
@@ -101,14 +101,12 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
         <AlertsTest />
       </div>
 
-      <div className="card flex items-center justify-between p-4">
-        <div className="label">Mode sombre</div>
-        <button
-          onClick={onToggleDark}
-          className={`tap rounded-md border px-4 py-1 font-cond text-sm ${dark ? 'border-ink bg-ink text-paper' : 'border-line'}`}
-        >
-          {dark ? 'activé' : 'désactivé'}
-        </button>
+      <div className="card p-4">
+        <div className="label mb-1">Thème</div>
+        <p className="text-sm text-ink-soft">
+          Le thème suit le profil : clair pour Arnaud, sombre pour Charline. Il bascule
+          automatiquement au changement de profil.
+        </p>
       </div>
 
       {msg && <p className="text-center text-sm text-ink-soft">{msg}</p>}

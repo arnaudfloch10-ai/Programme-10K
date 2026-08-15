@@ -25,18 +25,20 @@ export function SeanceCard({
   onOpenTest,
   onLog,
   realisee,
+  highlight = false,
 }: {
   seance: RepriseSeance
   onOpenTest?: () => void
   onLog?: () => void
   realisee?: SeanceRealisee
+  highlight?: boolean // séance du jour : bordure accent
 }) {
   const isTest = seance.type === 'TEST' || seance.test
   const [openWalk, setOpenWalk] = useState(false)
   const done = !!realisee
 
   return (
-    <div className="card p-4" style={done ? { borderColor: 'var(--accent, #141414)' } : undefined}>
+    <div className="card p-4" style={highlight ? { borderColor: 'var(--accent)' } : undefined}>
       <div className="mb-1 flex items-center gap-2">
         <span className="rounded px-1.5 py-0.5 font-cond text-[10px] font-bold uppercase text-white" style={{ backgroundColor: 'var(--accent, #141414)' }}>
           {JOUR_ABBR[seance.jourSuggere] ?? seance.jourSuggere}
@@ -88,15 +90,12 @@ export function SeanceCard({
         </details>
       )}
 
-      {/* État fait : récap compact + lien de modification. */}
+      {/* §7 — état fait : récap compact atténué (text-tertiary), sans accent ni
+          coche colorée. */}
       {!isTest && done && (
-        <div className="mt-3 rounded-md p-2.5" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, white)' }}>
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-cond text-sm font-semibold" style={{ color: 'var(--accent, #141414)' }}>
-              ✓ Fait
-            </span>
-            <Mono className="text-xs text-ink-soft">{recap(realisee)}</Mono>
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-2 text-ink-faint">
+          <span className="font-cond text-sm font-semibold">Fait</span>
+          <Mono className="text-xs">{recap(realisee)}</Mono>
         </div>
       )}
 
@@ -104,9 +103,9 @@ export function SeanceCard({
         <button
           onClick={onLog}
           className={`tap mt-2 w-full rounded-md border py-2 font-cond text-sm font-semibold ${
-            done ? 'border-line text-ink-soft' : ''
+            done ? 'border-line text-ink-faint' : ''
           }`}
-          style={done ? undefined : { borderColor: 'var(--accent, #141414)', color: 'var(--accent, #141414)' }}
+          style={done ? undefined : { borderColor: 'var(--accent)', color: 'var(--accent)' }}
         >
           {done ? 'Modifier la saisie' : 'Saisir'}
         </button>

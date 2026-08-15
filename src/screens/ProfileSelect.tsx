@@ -27,7 +27,7 @@ export function ProfileSelect({
             <button
               key={id}
               onClick={() => onSelect(id)}
-              className="tap flex w-full items-center gap-4 rounded-lg border-2 bg-white p-4 text-left"
+              className="tap flex w-full items-center gap-4 rounded-lg border-2 bg-surface p-4 text-left"
               style={{ borderColor: p.accentColor }}
             >
               <span

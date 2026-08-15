@@ -136,12 +136,14 @@ export interface Profile {
 
 export type ProfilId = 'arnaud' | 'charline'
 export type Pilotage = 'allure' | 'fc'
+export type ThemeId = 'light-copper' | 'dark-rose'
 
 /** Descripteur statique d'un profil (registre, non stocké en base). */
 export interface Profil {
   id: ProfilId
   prenom: string
-  accentColor: string // seul différenciateur visuel entre profils
+  accentColor: string // accent du profil (surcharge --accent)
+  theme: ThemeId // jeu de tokens appliqué via data-theme
   pilotage: Pilotage
   planId: string // référence vers le module de plan statique
 }
