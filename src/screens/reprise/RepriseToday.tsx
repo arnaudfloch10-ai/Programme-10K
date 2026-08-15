@@ -1,17 +1,26 @@
 import { useState } from 'react'
 import { useReprise } from '../../store/RepriseContext'
+import { useApp } from '../../store/AppContext'
 import { SeanceCard } from '../../components/reprise/SeanceCard'
 import { TestDemiCooper } from './TestDemiCooper'
+import { SeanceForm } from '../../components/reprise/SeanceForm'
+import { MesureForm } from '../../components/reprise/MesureForm'
+import { AlertList } from '../../components/AlertBanner'
 import { Mono } from '../../components/ui'
+import type { RepriseSeance } from '../../types'
 
 export function RepriseToday() {
-  const { plan, activeWeek, setActiveWeek } = useReprise()
+  const { plan, activeWeek, setActiveWeek, alerts, seances } = useReprise()
+  const { today } = useApp()
   const [test, setTest] = useState(false)
+  const [mesure, setMesure] = useState(false)
+  const [logSeance, setLogSeance] = useState<RepriseSeance | null>(null)
 
   const bloc1 = plan.blocs[0]
   const weeks = bloc1.semaines
   const week = weeks.find((w) => w.numero === activeWeek) ?? weeks[0]
   const f = plan.fourchetteTravailParDefaut
+  const isLogged = (id: string) => seances.some((s) => s.seanceId === id && s.date === today)
 
   return (
     <div className="space-y-4 px-4 py-4">
@@ -19,6 +28,17 @@ export function RepriseToday() {
         <div className="label">Bloc 1 · {bloc1.titre}</div>
         <h1 className="screen-title">Aujourd'hui</h1>
       </header>
+
+      {/* Alertes informatives (jamais bloquantes), en haut de l'accueil. */}
+      <AlertList alerts={alerts} />
+
+      {/* Saisie matinale, accès direct. */}
+      <button
+        onClick={() => setMesure(true)}
+        className="tap w-full rounded-md border border-line py-2.5 text-center font-cond text-sm font-semibold text-ink-soft"
+      >
+        Saisie du matin (FC repos · sommeil)
+      </button>
 
       {/* Navigation de semaine (plan relatif, sans dates). */}
       <div className="flex items-center justify-between">
@@ -62,11 +82,19 @@ export function RepriseToday() {
 
       <div className="space-y-3">
         {week.seances.map((s) => (
-          <SeanceCard key={s.id} seance={s} onOpenTest={() => setTest(true)} />
+          <SeanceCard
+            key={s.id}
+            seance={s}
+            onOpenTest={() => setTest(true)}
+            onLog={() => setLogSeance(s)}
+            logged={isLogged(s.id)}
+          />
         ))}
       </div>
 
       {test && <TestDemiCooper onClose={() => setTest(false)} />}
+      {mesure && <MesureForm onClose={() => setMesure(false)} />}
+      {logSeance && <SeanceForm seance={logSeance} onClose={() => setLogSeance(null)} />}
     </div>
   )
 }

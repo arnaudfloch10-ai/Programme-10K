@@ -17,6 +17,9 @@ import { RepriseToday } from './screens/reprise/RepriseToday'
 import { RepriseSemaine } from './screens/reprise/RepriseSemaine'
 import { ReprisePlan } from './screens/reprise/ReprisePlan'
 import { RepriseZones } from './screens/reprise/RepriseZones'
+import { RepriseBilan } from './screens/reprise/RepriseBilan'
+import { RepriseRenfo } from './screens/reprise/RepriseRenfo'
+import { RepriseSignaux } from './screens/reprise/RepriseSignaux'
 import type { ScreenId as ScreenIdT } from './components/BottomNav'
 
 function Shell() {
@@ -106,10 +109,11 @@ function RepriseScreens({
       {screen === 'plan' && <ReprisePlan />}
       {screen === 'zones' && <RepriseZones />}
       {screen === 'more' && <More onNavigate={onNavigate} fc />}
+      {screen === 'bilan' && <RepriseBilan />}
+      {screen === 'renfo' && <RepriseRenfo />}
+      {screen === 'signaux' && <RepriseSignaux />}
       {screen === 'settings' && settings}
-      {(screen === 'journal' || screen === 'measures') && (
-        <div className="px-4 py-8 text-center text-sm text-ink-soft">Bientôt disponible (suivi qualitatif).</div>
-      )}
+      {(screen === 'journal' || screen === 'measures') && <More onNavigate={onNavigate} fc />}
     </RepriseProvider>
   )
 }

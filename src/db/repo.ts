@@ -1,4 +1,12 @@
-import type { LoggedSession, Measurement, Profile, ProfilId, VmaTest } from '../types'
+import type {
+  LoggedSession,
+  Measurement,
+  MesureMatinale,
+  Profile,
+  ProfilId,
+  SeanceRealisee,
+  VmaTest,
+} from '../types'
 import {
   getDB,
   scoped,
@@ -10,6 +18,8 @@ import {
   type StoredLog,
   type StoredMeasurement,
   type StoredVmaTest,
+  type StoredSeanceFc,
+  type StoredMesureMatinale,
 } from './db'
 import { defaultProfileFor } from '../data/profile'
 import { isProfilId } from '../data/profils'
@@ -144,6 +154,37 @@ export async function getVmaTests(profileId: ProfilId): Promise<VmaTest[]> {
 export async function saveVmaTest(profileId: ProfilId, t: VmaTest): Promise<void> {
   const db = await getDB()
   await db.put('vmaTests', { ...t, profileId } as StoredVmaTest)
+}
+
+// --- Suivi qualitatif FC : séances réalisées ---
+
+export async function getSeancesFc(profileId: ProfilId): Promise<SeanceRealisee[]> {
+  const db = await getDB()
+  const s = await db.getAllFromIndex('seancesFc', 'by-profile', profileId)
+  return s.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+export async function saveSeanceFc(profileId: ProfilId, s: SeanceRealisee): Promise<void> {
+  const db = await getDB()
+  await db.put('seancesFc', { ...s, profileId } as StoredSeanceFc)
+}
+
+export async function deleteSeanceFc(profileId: ProfilId, seanceId: string, date: string): Promise<void> {
+  const db = await getDB()
+  await db.delete('seancesFc', [profileId, seanceId, date])
+}
+
+// --- Suivi qualitatif FC : mesures matinales ---
+
+export async function getMesuresMatinales(profileId: ProfilId): Promise<MesureMatinale[]> {
+  const db = await getDB()
+  const m = await db.getAllFromIndex('mesuresMatinales', 'by-profile', profileId)
+  return m.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+export async function saveMesureMatinale(profileId: ProfilId, m: MesureMatinale): Promise<void> {
+  const db = await getDB()
+  await db.put('mesuresMatinales', { ...m, profileId } as StoredMesureMatinale)
 }
 
 // --- Export / import (scopé au profil) ---

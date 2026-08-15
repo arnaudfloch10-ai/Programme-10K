@@ -5,7 +5,17 @@ const JOUR_ABBR: Record<string, string> = { mardi: 'MAR', jeudi: 'JEU', dimanche
 
 // Carte de séance FC : la cible en bpm est l'information principale (gros mono),
 // l'allure reste secondaire.
-export function SeanceCard({ seance, onOpenTest }: { seance: RepriseSeance; onOpenTest?: () => void }) {
+export function SeanceCard({
+  seance,
+  onOpenTest,
+  onLog,
+  logged = false,
+}: {
+  seance: RepriseSeance
+  onOpenTest?: () => void
+  onLog?: () => void
+  logged?: boolean
+}) {
   const isTest = seance.type === 'TEST' || seance.test
   return (
     <div className="card p-4">
@@ -48,6 +58,18 @@ export function SeanceCard({ seance, onOpenTest }: { seance: RepriseSeance; onOp
       )}
 
       {seance.note && <p className="mt-2 text-xs italic text-ink-soft">{seance.note}</p>}
+
+      {!isTest && onLog && (
+        <button
+          onClick={onLog}
+          className={`tap mt-3 w-full rounded-md border py-2 font-cond text-sm font-semibold ${
+            logged ? 'border-line text-ink-soft' : ''
+          }`}
+          style={logged ? undefined : { borderColor: 'var(--accent, #141414)', color: 'var(--accent, #141414)' }}
+        >
+          {logged ? '✓ Séance notée — modifier' : 'Noter cette séance'}
+        </button>
+      )}
     </div>
   )
 }
