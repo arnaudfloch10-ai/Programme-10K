@@ -9,7 +9,7 @@ export function RepriseZones() {
   const { profile } = useApp()
 
   return (
-    <div className="space-y-5 px-4 py-4">
+    <div className="space-y-4 px-4 py-3">
       <header>
         <h1 className="screen-title">Zones</h1>
         <p className="text-sm text-ink-soft">
@@ -24,7 +24,7 @@ export function RepriseZones() {
           <span className="label text-right">Allure</span>
         </div>
         {plan.zones.map((z) => (
-          <div key={z.id} className="grid items-center gap-x-2 border-b border-line px-3 py-2.5 last:border-0" style={{ gridTemplateColumns: '1fr auto auto' }}>
+          <div key={z.id} className="grid items-center gap-x-2 border-b border-line px-3 py-2 last:border-0" style={{ gridTemplateColumns: '1fr auto auto' }}>
             <div className="min-w-0">
               <div className="truncate font-cond text-sm font-bold">{z.libelle}</div>
               <div className="num text-[11px] text-ink-soft">{z.pctReserveMin}–{z.pctReserveMax} % réserve</div>
