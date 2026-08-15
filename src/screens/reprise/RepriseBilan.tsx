@@ -67,14 +67,14 @@ export function RepriseBilan() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <div className="text-xs text-ink-soft">Minutes</div>
-            <Mono className="data-lg font-bold" style={{ color: 'var(--accent)' }}>
+            <Mono className="data-lg font-bold text-ink">
               {volMin}
               <span className="text-sm text-ink-soft"> / {week.volumeCibleMin}</span>
             </Mono>
           </div>
           <div>
             <div className="text-xs text-ink-soft">Kilomètres</div>
-            <Mono className="data-lg font-bold" style={{ color: 'var(--accent)' }}>
+            <Mono className="data-lg font-bold text-ink">
               {formatKm(volKm)}
               <span className="text-sm text-ink-soft"> / {formatKm(week.volumeCibleKm)}</span>
             </Mono>

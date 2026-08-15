@@ -16,12 +16,17 @@ export default {
         z5: '#a32e3d',
         force: '#a86a1f',
         rest: '#9aa2a8',
-        // Neutres — instrument de travail, pas de couleur décorative.
-        ink: '#141414',
-        'ink-soft': '#4a4a4a',
-        paper: '#f7f7f5',
-        line: '#d9d8d3',
-        danger: '#a32e3d',
+        // Neutres — routés vers les tokens de thème (voir index.css :root /
+        // [data-theme]). Le thème est une propriété du profil actif.
+        ink: 'var(--text-primary)',
+        'ink-soft': 'var(--text-secondary)',
+        'ink-faint': 'var(--text-tertiary)',
+        paper: 'var(--bg)',
+        surface: 'var(--surface)',
+        'surface-raised': 'var(--surface-raised)',
+        line: 'var(--border)',
+        danger: 'var(--alert-high)',
+        warn: 'var(--alert-warn)',
       },
       fontFamily: {
         // Direction « premium sport ». Interface et titres : Jost* (géométrique

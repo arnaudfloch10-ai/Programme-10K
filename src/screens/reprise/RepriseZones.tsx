@@ -39,7 +39,7 @@ export function RepriseZones() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between rounded-md p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, white)' }}>
+      <div className="flex items-center justify-between rounded-md p-3" style={{ backgroundColor: 'var(--accent-tint)' }}>
         <span className="label">Fourchette bloc 1</span>
         <Mono className="text-lg font-bold" style={{ color: 'var(--accent)' }}>
           {plan.fourchetteTravailParDefaut.min}–{plan.fourchetteTravailParDefaut.max} <span className="text-xs text-ink-soft">bpm</span>

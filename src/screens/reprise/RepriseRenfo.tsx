@@ -17,9 +17,9 @@ export function RepriseRenfo() {
         </p>
       </header>
 
-      <div className="flex items-center justify-between rounded-md p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, white)' }}>
+      <div className="flex items-center justify-between rounded-md p-3" style={{ backgroundColor: 'var(--accent-tint)' }}>
         <span className="label">Cette semaine</span>
-        <span className="num text-lg font-bold" style={{ color: 'var(--accent)' }}>
+        <span className="num text-lg font-bold text-ink">
           {done}/{total}
         </span>
       </div>

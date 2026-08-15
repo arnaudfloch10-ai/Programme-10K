@@ -21,11 +21,51 @@
   src: url('/fonts/jetbrains-mono-latin.woff2') format('woff2');
 }
 
-:root {
+/* ---------------------------------------------------------------------------
+   Tokens de thème — propriété du PROFIL, appliqués via data-theme sur <html>.
+   Un seul jeu de composants lit ces variables ; aucun composant dupliqué.
+   Défaut (:root) = light-copper (profil Arnaud). --accent est surchargé par
+   le profil actif via JS (profil.accentColor).
+--------------------------------------------------------------------------- */
+:root,
+:root[data-theme='light-copper'] {
   color-scheme: light;
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #d9d8d3;
+  --text-primary: #141414;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #8a8a8a;
+  --accent: #3b4a5a; /* défaut, surchargé par le profil */
+  --accent-soft: #5a6b7c;
+  --accent-tint: color-mix(in srgb, var(--accent) 10%, #ffffff);
+  --alert-warn: #8a6d1f;
+  --alert-high: #a32e3d;
+  --label-color: var(--text-secondary);
+
   /* Règle globale non négociable : chiffres alignés, hauteur et chasse fixes. */
   font-variant-numeric: lining-nums tabular-nums;
   font-feature-settings: 'lnum' 1, 'tnum' 1;
+}
+
+/* Thème sombre « OLED rose » — profil Charline. Couleurs pleines (pas de
+   translucide, qui rend mal en OLED). */
+:root[data-theme='dark-rose'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #1a1a1c;
+  --surface-raised: #242427;
+  --border: #2e2e32;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a6;
+  --text-tertiary: #5c5c63;
+  --accent: #ff5ba8; /* surchargé par le profil (Charline) */
+  --accent-soft: #ff9ecb;
+  --accent-tint: #2e1a24; /* surface teintée rose, opaque */
+  --alert-warn: #ffb020;
+  --alert-high: #ff453a;
+  --label-color: var(--accent-soft);
 }
 
 html,
@@ -59,7 +99,8 @@ body {
 
 @layer components {
   .card {
-    @apply border border-line bg-white rounded-md;
+    @apply border border-line rounded-md;
+    background: var(--surface);
   }
 
   /* --- Rôles typographiques (Jost* variable) --- */
@@ -84,9 +125,12 @@ body {
     line-height: 1.15;
     font-variation-settings: 'wdth' 110, 'wght' 700;
   }
-  /* Libellé / intitulé de section : 11px, espacé, majuscules. */
+  /* Libellé / intitulé de section : 11px, espacé, majuscules.
+     Couleur pilotée par le thème (gris en clair, rose doux en sombre — le rose
+     vif produirait du halo à cette taille). */
   .label {
-    @apply font-cond uppercase text-ink-soft;
+    @apply font-cond uppercase;
+    color: var(--label-color);
     font-size: 11px;
     letter-spacing: 0.08em;
     font-variation-settings: 'wdth' 100, 'wght' 600;
@@ -114,31 +158,21 @@ body {
     white-space: nowrap;
   }
 
+  /* Champ de saisie : fond forcé au token (les inputs natifs restent souvent
+     blancs) ; color-scheme aligne aussi les contrôles natifs (spinners, caret). */
   .inp {
-    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-ink;
+    @apply w-full rounded-md border border-line px-3 py-2;
+    background: var(--surface-raised);
+    color: var(--text-primary);
     font-size: 16px; /* ≥16px : évite le zoom auto iOS à la saisie */
     min-height: 44px;
   }
-  .dark .inp {
-    @apply border-[#2a2a2a] bg-[#181818] text-[#ededed];
+  .inp::placeholder {
+    color: var(--text-tertiary);
   }
 }
 
 /* Jost* est la police de titres ET de corps ; on route les alias Tailwind. */
 .font-cond {
   font-family: 'Jost', ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Mode sombre (bonus). */
-.dark {
-  color-scheme: dark;
-}
-.dark body {
-  @apply bg-[#111111] text-[#ededed];
-}
-.dark .card {
-  @apply border-[#2a2a2a] bg-[#181818];
-}
-.dark .label {
-  @apply text-[#9a9a9a];
 }
