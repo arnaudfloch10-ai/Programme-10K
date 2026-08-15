@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 /* Polices auto-hébergées (latin) — aucun appel réseau au runtime.
-   Archivo variable (axes largeur wdth + graisse wght) pour l'interface,
-   JetBrains Mono pour toutes les données chiffrées. */
+   Jost* variable (graisse wght, géométrique façon Futura) pour l'interface,
+   JetBrains Mono pour toutes les données chiffrées.
+   Jost* — SIL Open Font License 1.1 (indestructibletype). Voir public/fonts/LICENSES.md. */
 @font-face {
-  font-family: 'Archivo';
+  font-family: 'Jost';
   font-style: normal;
   font-weight: 400 800;
-  font-stretch: 62.5% 125%;
   font-display: swap;
-  src: url('/fonts/archivo-var-latin.woff2') format('woff2');
+  src: url('/fonts/jost-var-latin.woff2') format('woff2');
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -36,7 +36,7 @@ body,
 
 body {
   @apply bg-paper text-ink font-sans antialiased;
-  /* Corps : Archivo largeur normale, 15px. */
+  /* Corps : Jost* graisse normale, 15px. */
   font-size: 15px;
   font-weight: 400;
   line-height: 1.45;
@@ -62,7 +62,7 @@ body {
     @apply border border-line bg-white rounded-md;
   }
 
-  /* --- Rôles typographiques (Archivo variable) --- */
+  /* --- Rôles typographiques (Jost* variable) --- */
 
   /* Titre d'écran : grotesque athlétique large, 28px. */
   .screen-title {
@@ -124,9 +124,9 @@ body {
   }
 }
 
-/* Archivo est la police de titres ET de corps ; on route les alias Tailwind. */
+/* Jost* est la police de titres ET de corps ; on route les alias Tailwind. */
 .font-cond {
-  font-family: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Jost', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Mode sombre (bonus). */
