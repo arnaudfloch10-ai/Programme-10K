@@ -24,11 +24,11 @@ export default {
         danger: '#a32e3d',
       },
       fontFamily: {
-        // Direction « premium sport ». Interface et titres : Archivo (grotesque
-        // variable, axes largeur + graisse). Données chiffrées : JetBrains Mono.
-        cond: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        sans: ['Archivo', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        // Direction « premium sport ». Interface et titres : Jost* (géométrique
+        // variable façon Futura). Données chiffrées : JetBrains Mono.
+        cond: ['Jost', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Jost', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Jost', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
