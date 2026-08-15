@@ -1,178 +1,180 @@
-import type { LoggedSession, Measurement, Profile, VmaTest, Week } from '../types'
-import { getDB, PROFILE_KEY, SEEDED_KEY, FIRST_LAUNCH_KEY, LAST_EXPORT_KEY } from './db'
-import { BLOC0_WEEKS } from '../data/seedBloc0'
-import { DEFAULT_PROFILE } from '../data/profile'
+import type { LoggedSession, Measurement, Profile, ProfilId, VmaTest } from '../types'
+import {
+  getDB,
+  scoped,
+  ACTIVE_PROFILE_KEY,
+  PROFILE_KEY,
+  SEEDED_KEY,
+  FIRST_LAUNCH_KEY,
+  LAST_EXPORT_KEY,
+  type StoredLog,
+  type StoredMeasurement,
+  type StoredVmaTest,
+} from './db'
+import { defaultProfileFor } from '../data/profile'
+import { isProfilId } from '../data/profils'
 
-// --- Réglages / profil ---
+// --- Profil actif (global) ---
 
-export async function getProfile(): Promise<Profile> {
+export async function getActiveProfileId(): Promise<ProfilId | null> {
   const db = await getDB()
-  const p = (await db.get('settings', PROFILE_KEY)) as Profile | undefined
-  return p ?? DEFAULT_PROFILE
+  const v = await db.get('settings', ACTIVE_PROFILE_KEY)
+  return isProfilId(v) ? v : null
 }
 
-export async function saveProfile(p: Profile): Promise<void> {
+export async function setActiveProfileId(id: ProfilId): Promise<void> {
   const db = await getDB()
-  await db.put('settings', p, PROFILE_KEY)
+  await db.put('settings', id, ACTIVE_PROFILE_KEY)
 }
 
-/** Met à jour uniquement la VMA (recalibrage) sans toucher au reste. */
-export async function setVma(vma: number): Promise<Profile> {
-  const p = await getProfile()
+// --- Réglages / profil (namespacés par profil) ---
+
+export async function getProfile(profileId: ProfilId): Promise<Profile> {
+  const db = await getDB()
+  const p = (await db.get('settings', scoped(profileId, PROFILE_KEY))) as Profile | undefined
+  return p ?? defaultProfileFor(profileId)
+}
+
+export async function saveProfile(profileId: ProfilId, p: Profile): Promise<void> {
+  const db = await getDB()
+  await db.put('settings', p, scoped(profileId, PROFILE_KEY))
+}
+
+/** Recalibrage VMA sans toucher au reste. */
+export async function setVma(profileId: ProfilId, vma: number): Promise<Profile> {
+  const p = await getProfile(profileId)
   const next = { ...p, vma }
-  await saveProfile(next)
+  await saveProfile(profileId, next)
   return next
 }
 
-// --- Métadonnées de sauvegarde ---
+/** Initialise un profil au premier accès : écrit ses réglages par défaut. Idempotent. */
+export async function ensureProfileInitialized(profileId: ProfilId): Promise<void> {
+  const db = await getDB()
+  const seeded = await db.get('settings', scoped(profileId, SEEDED_KEY))
+  if (seeded) return
+  const existing = await db.get('settings', scoped(profileId, PROFILE_KEY))
+  if (!existing) await db.put('settings', defaultProfileFor(profileId), scoped(profileId, PROFILE_KEY))
+  await db.put('settings', true, scoped(profileId, SEEDED_KEY))
+}
 
-export async function getExportMeta(): Promise<{ firstLaunchAt?: string; lastExportAt?: string }> {
+// --- Métadonnées de sauvegarde (par profil) ---
+
+export async function getExportMeta(
+  profileId: ProfilId,
+): Promise<{ firstLaunchAt?: string; lastExportAt?: string }> {
   const db = await getDB()
   const [firstLaunchAt, lastExportAt] = await Promise.all([
-    db.get('settings', FIRST_LAUNCH_KEY) as Promise<string | undefined>,
-    db.get('settings', LAST_EXPORT_KEY) as Promise<string | undefined>,
+    db.get('settings', scoped(profileId, FIRST_LAUNCH_KEY)) as Promise<string | undefined>,
+    db.get('settings', scoped(profileId, LAST_EXPORT_KEY)) as Promise<string | undefined>,
   ])
   return { firstLaunchAt, lastExportAt }
 }
 
-export async function ensureFirstLaunch(todayISO: string): Promise<void> {
+export async function ensureFirstLaunch(profileId: ProfilId, todayISO: string): Promise<void> {
   const db = await getDB()
-  const existing = await db.get('settings', FIRST_LAUNCH_KEY)
-  if (!existing) await db.put('settings', todayISO, FIRST_LAUNCH_KEY)
+  const existing = await db.get('settings', scoped(profileId, FIRST_LAUNCH_KEY))
+  if (!existing) await db.put('settings', todayISO, scoped(profileId, FIRST_LAUNCH_KEY))
 }
 
-export async function setLastExport(todayISO: string): Promise<void> {
+export async function setLastExport(profileId: ProfilId, todayISO: string): Promise<void> {
   const db = await getDB()
-  await db.put('settings', todayISO, LAST_EXPORT_KEY)
+  await db.put('settings', todayISO, scoped(profileId, LAST_EXPORT_KEY))
 }
 
-// --- Plan / semaines ---
+// --- Séances réalisées (scopées via l'index by-profile) ---
 
-export async function getWeeks(): Promise<Week[]> {
+export async function getLogs(profileId: ProfilId): Promise<LoggedSession[]> {
   const db = await getDB()
-  const weeks = await db.getAll('weeks')
-  return weeks.sort((a, b) => a.number - b.number)
-}
-
-export async function saveWeek(week: Week): Promise<void> {
-  const db = await getDB()
-  await db.put('weeks', week)
-}
-
-// --- Logs ---
-
-export async function getLogs(): Promise<LoggedSession[]> {
-  const db = await getDB()
-  const logs = await db.getAll('logs')
+  const logs = await db.getAllFromIndex('logs', 'by-profile', profileId)
   return logs.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function saveLog(log: LoggedSession): Promise<void> {
+export async function saveLog(profileId: ProfilId, log: LoggedSession): Promise<void> {
   const db = await getDB()
-  await db.put('logs', log)
+  await db.put('logs', { ...log, profileId } as StoredLog)
 }
 
-export async function deleteLog(sessionId: string, date: string): Promise<void> {
+export async function deleteLog(profileId: ProfilId, sessionId: string, date: string): Promise<void> {
   const db = await getDB()
-  await db.delete('logs', [sessionId, date])
+  await db.delete('logs', [profileId, sessionId, date])
 }
 
 // --- Mesures ---
 
-export async function getMeasurements(): Promise<Measurement[]> {
+export async function getMeasurements(profileId: ProfilId): Promise<Measurement[]> {
   const db = await getDB()
-  const m = await db.getAll('measurements')
+  const m = await db.getAllFromIndex('measurements', 'by-profile', profileId)
   return m.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function saveMeasurement(m: Measurement): Promise<void> {
+export async function saveMeasurement(profileId: ProfilId, m: Measurement): Promise<void> {
   const db = await getDB()
-  await db.put('measurements', m)
+  await db.put('measurements', { ...m, profileId } as StoredMeasurement)
 }
 
-export async function deleteMeasurement(date: string): Promise<void> {
+export async function deleteMeasurement(profileId: ProfilId, date: string): Promise<void> {
   const db = await getDB()
-  await db.delete('measurements', date)
+  await db.delete('measurements', [profileId, date])
 }
 
 // --- Tests VMA ---
 
-export async function getVmaTests(): Promise<VmaTest[]> {
+export async function getVmaTests(profileId: ProfilId): Promise<VmaTest[]> {
   const db = await getDB()
-  const t = await db.getAll('vmaTests')
+  const t = await db.getAllFromIndex('vmaTests', 'by-profile', profileId)
   return t.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function saveVmaTest(t: VmaTest): Promise<void> {
+export async function saveVmaTest(profileId: ProfilId, t: VmaTest): Promise<void> {
   const db = await getDB()
-  await db.put('vmaTests', t)
+  await db.put('vmaTests', { ...t, profileId } as StoredVmaTest)
 }
 
-// --- Seed (premier lancement, idempotent) ---
-
-export async function ensureSeeded(): Promise<void> {
-  const db = await getDB()
-  const seeded = await db.get('settings', SEEDED_KEY)
-  if (seeded) return
-
-  const tx = db.transaction(['weeks', 'settings'], 'readwrite')
-  for (const week of BLOC0_WEEKS) {
-    await tx.objectStore('weeks').put(week)
-  }
-  const settings = tx.objectStore('settings')
-  const existingProfile = await settings.get(PROFILE_KEY)
-  if (!existingProfile) {
-    await settings.put(DEFAULT_PROFILE, PROFILE_KEY)
-  }
-  await settings.put(true, SEEDED_KEY)
-  await tx.done
-}
-
-// --- Export / import complet ---
+// --- Export / import (scopé au profil) ---
 
 export interface ExportBundle {
   version: number
   exportedAt: string
+  profileId: ProfilId
   profile: Profile
-  weeks: Week[]
   logs: LoggedSession[]
   measurements: Measurement[]
   vmaTests: VmaTest[]
 }
 
-export async function exportAll(): Promise<ExportBundle> {
-  const [profile, weeks, logs, measurements, vmaTests] = await Promise.all([
-    getProfile(),
-    getWeeks(),
-    getLogs(),
-    getMeasurements(),
-    getVmaTests(),
+export async function exportAll(profileId: ProfilId): Promise<ExportBundle> {
+  const [profile, logs, measurements, vmaTests] = await Promise.all([
+    getProfile(profileId),
+    getLogs(profileId),
+    getMeasurements(profileId),
+    getVmaTests(profileId),
   ])
-  return {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    profile,
-    weeks,
-    logs,
-    measurements,
-    vmaTests,
-  }
+  return { version: 2, exportedAt: new Date().toISOString(), profileId, profile, logs, measurements, vmaTests }
 }
 
-export async function importAll(bundle: ExportBundle): Promise<void> {
+export async function importAll(profileId: ProfilId, bundle: ExportBundle): Promise<void> {
   const db = await getDB()
-  const tx = db.transaction(['settings', 'weeks', 'logs', 'measurements', 'vmaTests'], 'readwrite')
-  // Remplace intégralement les données existantes.
-  await tx.objectStore('weeks').clear()
-  await tx.objectStore('logs').clear()
-  await tx.objectStore('measurements').clear()
-  await tx.objectStore('vmaTests').clear()
+  const tx = db.transaction(['settings', 'logs', 'measurements', 'vmaTests'], 'readwrite')
+  // Remplace uniquement les données DU profil courant (les autres profils sont intacts).
+  const wipe = async (store: 'logs' | 'measurements' | 'vmaTests') => {
+    const idx = tx.objectStore(store).index('by-profile')
+    let cursor = await idx.openCursor(profileId)
+    while (cursor) {
+      await cursor.delete()
+      cursor = await cursor.continue()
+    }
+  }
+  await wipe('logs')
+  await wipe('measurements')
+  await wipe('vmaTests')
 
-  await tx.objectStore('settings').put(bundle.profile, PROFILE_KEY)
-  for (const w of bundle.weeks) await tx.objectStore('weeks').put(w)
-  for (const l of bundle.logs) await tx.objectStore('logs').put(l)
-  for (const m of bundle.measurements) await tx.objectStore('measurements').put(m)
-  for (const t of bundle.vmaTests) await tx.objectStore('vmaTests').put(t)
-  await tx.objectStore('settings').put(true, SEEDED_KEY)
+  await tx.objectStore('settings').put(bundle.profile, scoped(profileId, PROFILE_KEY))
+  for (const l of bundle.logs) await tx.objectStore('logs').put({ ...l, profileId } as StoredLog)
+  for (const m of bundle.measurements)
+    await tx.objectStore('measurements').put({ ...m, profileId } as StoredMeasurement)
+  for (const t of bundle.vmaTests)
+    await tx.objectStore('vmaTests').put({ ...t, profileId } as StoredVmaTest)
+  await tx.objectStore('settings').put(true, scoped(profileId, SEEDED_KEY))
   await tx.done
 }

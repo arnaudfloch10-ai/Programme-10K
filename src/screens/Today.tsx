@@ -14,8 +14,26 @@ import { derivedPaces, formatPace, ZONE_COLORS } from '../lib/zones'
 import type { Session, Week } from '../types'
 
 export function Today() {
-  const { today, weeks, profile, logs, alerts } = useApp()
+  const { today, weeks, profile, logs, alerts, profil } = useApp()
   const [logging, setLogging] = useState(false)
+
+  // Profils pilotés FC (Charline) : le contenu du plan arrive en Phase B.
+  if (profil?.pilotage === 'fc') {
+    return (
+      <div className="space-y-4 px-4 py-4">
+        <header>
+          <div className="label">{formatLongDate(today)}</div>
+          <h1 className="screen-title">Aujourd'hui</h1>
+        </header>
+        <div className="card p-6 text-center">
+          <div className="font-cond text-lg font-bold">Plan en préparation</div>
+          <p className="mt-1 text-sm text-ink-soft">
+            Le plan « Reprise aérobie » (piloté en fréquence cardiaque) arrive très bientôt.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const week = findWeekForDate(weeks, today)
   const session = sessionForDate(week, today)

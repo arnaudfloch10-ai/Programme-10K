@@ -25,7 +25,7 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
     try {
       const text = await file.text()
       const bundle = JSON.parse(text) as ExportBundle
-      if (!bundle.profile || !Array.isArray(bundle.weeks)) throw new Error('format')
+      if (!bundle.profile || !Array.isArray(bundle.logs)) throw new Error('format')
       await importAll(bundle)
       setP(bundle.profile)
       setMsg('Import réussi.')
@@ -49,10 +49,12 @@ export function Settings({ dark, onToggleDark }: { dark: boolean; onToggleDark: 
           <F label="FC max (bpm)" value={String(p.fcMax)} onChange={(v) => setP({ ...p, fcMax: num(v) })} />
           <F label="VMA (km/h)" value={String(p.vma)} onChange={(v) => setP({ ...p, vma: num(v) })} />
         </div>
-        <div className="rounded-md bg-paper p-2 text-xs text-ink-soft">
-          À VMA {p.vma} km/h : allure 10 km <span className="num font-bold">{formatPace(3600 / (p.vma * 0.88))}</span>/km ·
-          objectif {p.goalRaceName} le {formatLongDate(p.goalRaceDate)} ({formatPace(p.goalTimeS / 10)}/km cible).
-        </div>
+        {p.goalRaceName && p.goalRaceDate && p.goalTimeS && p.vma > 0 && (
+          <div className="rounded-md bg-paper p-2 text-xs text-ink-soft">
+            À VMA {p.vma} km/h : allure 10 km <span className="num font-bold">{formatPace(3600 / (p.vma * 0.88))}</span>/km ·
+            objectif {p.goalRaceName} le {formatLongDate(p.goalRaceDate)} ({formatPace(p.goalTimeS / 10)}/km cible).
+          </div>
+        )}
         <button
           onClick={async () => {
             await saveProfile(p)

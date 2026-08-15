@@ -120,10 +120,28 @@ export interface Profile {
   heightCm: number
   weightKg: number
   fcMax: number
-  vma: number // km/h — LE paramètre central
-  goalRaceName: string
-  goalRaceDate: string
-  goalTimeS: number
-  testRaceName: string
-  testRaceDate: string
+  vma: number // km/h — paramètre central pour le pilotage à l'allure (peut être 0 si non mesurée)
+  // Champs objectif : propres au plan course d'Arnaud (optionnels pour les autres profils).
+  goalRaceName?: string
+  goalRaceDate?: string
+  goalTimeS?: number
+  testRaceName?: string
+  testRaceDate?: string
+  // Champs du pilotage FC (profils de type « reprise »).
+  fcRepos?: number
+  vmaMeasuredAt?: string // ISO — date du test demi-Cooper si réalisé
+}
+
+// --- Multi-profil ---
+
+export type ProfilId = 'arnaud' | 'charline'
+export type Pilotage = 'allure' | 'fc'
+
+/** Descripteur statique d'un profil (registre, non stocké en base). */
+export interface Profil {
+  id: ProfilId
+  prenom: string
+  accentColor: string // seul différenciateur visuel entre profils
+  pilotage: Pilotage
+  planId: string // référence vers le module de plan statique
 }
