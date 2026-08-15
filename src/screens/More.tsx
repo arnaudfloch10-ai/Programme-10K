@@ -6,9 +6,16 @@ const ITEMS: { id: ScreenId; label: string; desc: string }[] = [
   { id: 'settings', label: 'Réglages', desc: 'Profil, VMA, export / import' },
 ]
 
-// En mode FC (Charline), Journal / Mesures / renfo / signaux arrivent en Phase C.
+// Suivi qualitatif du profil FC (Charline) : bilan, renfo, signaux.
+const ITEMS_FC: { id: ScreenId; label: string; desc: string }[] = [
+  { id: 'bilan', label: 'Bilan semaine', desc: 'Réalisé vs prévu, résumé coach copiable' },
+  { id: 'renfo', label: 'Renforcement', desc: '6 exercices, réinitialisés chaque semaine' },
+  { id: 'signaux', label: "Signaux d'alerte", desc: 'Quand consulter · compteur chaussures' },
+  { id: 'settings', label: 'Réglages', desc: 'Profil, export / import' },
+]
+
 export function More({ onNavigate, fc = false }: { onNavigate: (s: ScreenId) => void; fc?: boolean }) {
-  const items = fc ? ITEMS.filter((it) => it.id === 'settings') : ITEMS
+  const items = fc ? ITEMS_FC : ITEMS
   return (
     <div className="space-y-4 px-4 py-4">
       <header>
@@ -31,11 +38,6 @@ export function More({ onNavigate, fc = false }: { onNavigate: (s: ScreenId) => 
           </button>
         ))}
       </div>
-      {fc && (
-        <p className="px-1 text-xs text-ink-soft">
-          Journal, mesures, renforcement et signaux d'alerte arrivent très bientôt (suivi qualitatif).
-        </p>
-      )}
     </div>
   )
 }

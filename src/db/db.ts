@@ -1,14 +1,16 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { LoggedSession, Measurement, ProfilId, VmaTest } from '../types'
+import type { LoggedSession, Measurement, MesureMatinale, ProfilId, SeanceRealisee, VmaTest } from '../types'
 
 export const DB_NAME = 'programme-10k'
-// v2 : cloisonnement par profil. Toutes les données utilisateur portent un profileId.
-export const DB_VERSION = 2
+// v2 : cloisonnement par profil. v3 : suivi qualitatif FC (séances réalisées, mesures matinales).
+export const DB_VERSION = 3
 
 // Valeurs stockées : les données applicatives + le profil auquel elles appartiennent.
 export type StoredLog = LoggedSession & { profileId: ProfilId }
 export type StoredMeasurement = Measurement & { profileId: ProfilId }
 export type StoredVmaTest = VmaTest & { profileId: ProfilId }
+export type StoredSeanceFc = SeanceRealisee & { profileId: ProfilId }
+export type StoredMesureMatinale = MesureMatinale & { profileId: ProfilId }
 
 export interface AppDB extends DBSchema {
   // Clé-valeur. Clés namespacées par profil (`profile:<id>:*`) + globales
@@ -27,6 +29,17 @@ export interface AppDB extends DBSchema {
   vmaTests: {
     key: [ProfilId, string] // [profileId, date]
     value: StoredVmaTest
+    indexes: { 'by-profile': ProfilId }
+  }
+  // v3 — suivi qualitatif du profil FC.
+  seancesFc: {
+    key: [ProfilId, string, string] // [profileId, seanceId, date]
+    value: StoredSeanceFc
+    indexes: { 'by-profile': ProfilId }
+  }
+  mesuresMatinales: {
+    key: [ProfilId, string] // [profileId, date]
+    value: StoredMesureMatinale
     indexes: { 'by-profile': ProfilId }
   }
 }
@@ -103,6 +116,16 @@ export function getDB(): Promise<IDBPDatabase<AppDB>> {
         } else if (oldVersion === 0) {
           // Installation neuve : stores vides, pas de profil actif (le sélecteur choisit).
           createDataStores(db)
+        }
+
+        // --- v3 : stores du suivi qualitatif FC (additif, aucune migration). ---
+        if (!db.objectStoreNames.contains('seancesFc')) {
+          const s = db.createObjectStore('seancesFc', { keyPath: ['profileId', 'seanceId', 'date'] })
+          s.createIndex('by-profile', 'profileId')
+        }
+        if (!db.objectStoreNames.contains('mesuresMatinales')) {
+          const m = db.createObjectStore('mesuresMatinales', { keyPath: ['profileId', 'date'] })
+          m.createIndex('by-profile', 'profileId')
         }
       },
     })

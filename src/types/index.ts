@@ -218,3 +218,41 @@ export interface ReprisePlan {
   blocs: RepriseBloc[]
   testVma: RepriseTestVma
 }
+
+// --- Suivi qualitatif (profil FC) ---
+
+export type SensationJambes = 'fraiches' | 'normales' | 'lourdes'
+
+export interface SeanceRealisee {
+  seanceId: string
+  date: string
+  dureeMin?: number
+  distanceKm?: number
+  fcMoy?: number
+  fcMax?: number
+  cadence?: number
+  ressenti: 1 | 2 | 3 | 4 | 5
+  sensationJambes: SensationJambes
+  commentaire?: string
+}
+
+export interface MesureMatinale {
+  date: string
+  fcRepos?: number
+  qualiteSommeil: 1 | 2 | 3 | 4 | 5
+}
+
+// Renforcement musculaire (onglet dédié au profil FC).
+export interface RenfoExercice {
+  id: string
+  nom: string
+  volume: string // "3 × 15/jambe"
+  justification: string // libellé secondaire, physiologique
+}
+
+// Configuration du suivi qualitatif propre au profil FC (fichier de données isolé).
+export interface RepriseSuivi {
+  renfo: RenfoExercice[]
+  signauxArret: string[]
+  chaussure: { nom: string; seuilMinKm: number; seuilMaxKm: number }
+}
