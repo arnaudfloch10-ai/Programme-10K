@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { AppProvider, useApp } from './store/AppContext'
 import { BottomNav, type ScreenId } from './components/BottomNav'
 import { MedicalFooter } from './components/MedicalFooter'
@@ -12,6 +12,12 @@ import { More } from './screens/More'
 import { Journal } from './screens/Journal'
 import { Measures } from './screens/Measures'
 import { Settings } from './screens/Settings'
+import { RepriseProvider } from './store/RepriseContext'
+import { RepriseToday } from './screens/reprise/RepriseToday'
+import { RepriseSemaine } from './screens/reprise/RepriseSemaine'
+import { ReprisePlan } from './screens/reprise/ReprisePlan'
+import { RepriseZones } from './screens/reprise/RepriseZones'
+import type { ScreenId as ScreenIdT } from './components/BottomNav'
 
 function Shell() {
   const { loading, profilId, profil, switchProfile } = useApp()
@@ -55,22 +61,56 @@ function Shell() {
     )
   }
 
+  const fc = profil?.pilotage === 'fc'
+  const settings = <Settings dark={dark} onToggleDark={() => setDark((d) => !d)} />
+
   return (
     <div className="mx-auto flex min-h-full max-w-xl flex-col">
       <ProfileHeader onSwitch={() => setEntered(false)} />
       <main className="flex-1">
-        {screen === 'today' && <Today />}
-        {screen === 'week' && <WeekView />}
-        {screen === 'plan' && <Plan />}
-        {screen === 'zones' && <Zones />}
-        {screen === 'more' && <More onNavigate={setScreen} />}
-        {screen === 'journal' && <Journal />}
-        {screen === 'measures' && <Measures />}
-        {screen === 'settings' && <Settings dark={dark} onToggleDark={() => setDark((d) => !d)} />}
+        {fc ? (
+          <RepriseScreens screen={screen} onNavigate={setScreen} settings={settings} />
+        ) : (
+          <>
+            {screen === 'today' && <Today />}
+            {screen === 'week' && <WeekView />}
+            {screen === 'plan' && <Plan />}
+            {screen === 'zones' && <Zones />}
+            {screen === 'more' && <More onNavigate={setScreen} />}
+            {screen === 'journal' && <Journal />}
+            {screen === 'measures' && <Measures />}
+            {screen === 'settings' && settings}
+          </>
+        )}
         <MedicalFooter />
       </main>
       <BottomNav active={screen} onNavigate={setScreen} />
     </div>
+  )
+}
+
+// Écrans du profil piloté FC (Charline), regroupés sous leur propre provider.
+function RepriseScreens({
+  screen,
+  onNavigate,
+  settings,
+}: {
+  screen: ScreenIdT
+  onNavigate: (s: ScreenIdT) => void
+  settings: ReactNode
+}) {
+  return (
+    <RepriseProvider>
+      {screen === 'today' && <RepriseToday />}
+      {screen === 'week' && <RepriseSemaine />}
+      {screen === 'plan' && <ReprisePlan />}
+      {screen === 'zones' && <RepriseZones />}
+      {screen === 'more' && <More onNavigate={onNavigate} fc />}
+      {screen === 'settings' && settings}
+      {(screen === 'journal' || screen === 'measures') && (
+        <div className="px-4 py-8 text-center text-sm text-ink-soft">Bientôt disponible (suivi qualitatif).</div>
+      )}
+    </RepriseProvider>
   )
 }
 

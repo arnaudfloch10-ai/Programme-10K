@@ -145,3 +145,76 @@ export interface Profil {
   pilotage: Pilotage
   planId: string // référence vers le module de plan statique
 }
+
+// --- Plan piloté en fréquence cardiaque (profil « reprise ») ---
+
+export interface FcCible {
+  min: number
+  max: number
+}
+
+export interface RepriseZone {
+  id: string
+  libelle: string
+  pctReserveMin: number
+  pctReserveMax: number
+  fcMin: number
+  fcMax: number
+  allureMin: string // "9:15" — plus lent
+  allureMax: string // "8:45" — plus rapide
+}
+
+export interface RepriseSeance {
+  id: string
+  jourSuggere: string // "mardi", "jeudi", "dimanche"
+  type: string // "EF", "EF + cadence", "TEST"…
+  contenu: string
+  dureeMin: number
+  fcCible: FcCible | null
+  allureCible: string | null // ex. "8:30-9:00", secondaire
+  note: string | null
+  test?: boolean // séance test demi-Cooper
+}
+
+export interface RepriseSemaine {
+  numero: number
+  allegee: boolean
+  volumeCibleMin: number // minutes cibles
+  volumeCibleKm: number
+  consigneCle: string
+  seances: RepriseSeance[]
+}
+
+export type BlocStatut = 'actif' | 'verrouille'
+
+export interface RepriseBloc {
+  numero: number
+  titre: string
+  objectif: string
+  statut: BlocStatut
+  messageVerrouille?: string
+  semaines: RepriseSemaine[]
+}
+
+export interface RepriseTestAllure {
+  id: string
+  libelle: string
+  pctVmaMin: number
+  pctVmaMax: number
+}
+
+export interface RepriseTestVma {
+  type: string
+  dureeSecondes: number
+  preDecompteSecondes: number
+  formuleVma: string
+  recalculAllures: RepriseTestAllure[]
+  messageApresTest: string
+}
+
+export interface ReprisePlan {
+  zones: RepriseZone[]
+  fourchetteTravailParDefaut: FcCible
+  blocs: RepriseBloc[]
+  testVma: RepriseTestVma
+}
