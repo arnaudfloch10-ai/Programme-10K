@@ -27,6 +27,21 @@ export async function setActiveProfileId(id: ProfilId): Promise<void> {
   await db.put('settings', id, ACTIVE_PROFILE_KEY)
 }
 
+// --- Réglages génériques scopés (ex. semaine active de Charline) ---
+
+export async function getScopedSetting<T = unknown>(
+  profileId: ProfilId,
+  key: string,
+): Promise<T | undefined> {
+  const db = await getDB()
+  return (await db.get('settings', scoped(profileId, key))) as T | undefined
+}
+
+export async function setScopedSetting(profileId: ProfilId, key: string, value: unknown): Promise<void> {
+  const db = await getDB()
+  await db.put('settings', value, scoped(profileId, key))
+}
+
 // --- Réglages / profil (namespacés par profil) ---
 
 export async function getProfile(profileId: ProfilId): Promise<Profile> {

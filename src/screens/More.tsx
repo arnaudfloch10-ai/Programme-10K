@@ -6,14 +6,16 @@ const ITEMS: { id: ScreenId; label: string; desc: string }[] = [
   { id: 'settings', label: 'Réglages', desc: 'Profil, VMA, export / import' },
 ]
 
-export function More({ onNavigate }: { onNavigate: (s: ScreenId) => void }) {
+// En mode FC (Charline), Journal / Mesures / renfo / signaux arrivent en Phase C.
+export function More({ onNavigate, fc = false }: { onNavigate: (s: ScreenId) => void; fc?: boolean }) {
+  const items = fc ? ITEMS.filter((it) => it.id === 'settings') : ITEMS
   return (
     <div className="space-y-4 px-4 py-4">
       <header>
         <h1 className="screen-title">Plus</h1>
       </header>
       <div className="space-y-2">
-        {ITEMS.map((it) => (
+        {items.map((it) => (
           <button
             key={it.id}
             onClick={() => onNavigate(it.id)}
@@ -29,6 +31,11 @@ export function More({ onNavigate }: { onNavigate: (s: ScreenId) => void }) {
           </button>
         ))}
       </div>
+      {fc && (
+        <p className="px-1 text-xs text-ink-soft">
+          Journal, mesures, renforcement et signaux d'alerte arrivent très bientôt (suivi qualitatif).
+        </p>
+      )}
     </div>
   )
 }

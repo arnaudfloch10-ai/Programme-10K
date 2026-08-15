@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { ZONE_COLORS, ZONE_LABELS, type ZoneId } from '../lib/zones'
 
 /** Pastille couleur de zone. La couleur n'encode QUE l'intensité. */
@@ -24,8 +24,20 @@ export function ZoneStripe({ zone }: { zone: ZoneId }) {
 }
 
 /** Texte monospace pour allures / temps / FC (alignement des chiffres). */
-export function Mono({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <span className={`num ${className}`}>{children}</span>
+export function Mono({
+  children,
+  className = '',
+  style,
+}: {
+  children: ReactNode
+  className?: string
+  style?: CSSProperties
+}) {
+  return (
+    <span className={`num ${className}`} style={style}>
+      {children}
+    </span>
+  )
 }
 
 export function Stat({ label, children }: { label: string; children: ReactNode }) {
