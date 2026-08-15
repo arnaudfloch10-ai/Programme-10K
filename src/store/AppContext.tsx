@@ -1,15 +1,21 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { LoggedSession, Measurement, Profile, VmaTest, Week } from '../types'
+import type { LoggedSession, Measurement, Profile, ProfilId, VmaTest, Week } from '../types'
 import * as repo from '../db/repo'
 import type { ExportBundle } from '../db/repo'
+import { getDB } from '../db/db'
+import { getProfil } from '../data/profils'
+import { weeksForPlan } from '../data/plans'
 import { computeAlerts, type Alert, type Z2Sample } from '../lib/alerts'
 import { findWeekForDate, weekDoneKm } from '../lib/plan'
 import { parseISODate, todayISO, daysBetween } from '../lib/format'
+import type { Profil } from '../types'
 
 const EXPORT_REMINDER_DAYS = 28 // rappel d'export toutes les 4 semaines
 
 interface AppState {
   loading: boolean
+  profilId: ProfilId | null // null → aucun profil actif (afficher le sélecteur)
+  profil: Profil | null
   profile: Profile
   weeks: Week[]
   logs: LoggedSession[]
@@ -17,7 +23,9 @@ interface AppState {
   vmaTests: VmaTest[]
   alerts: Alert[]
   today: string
-  // actions
+  // actions profil
+  switchProfile: (id: ProfilId) => Promise<void>
+  // actions données (scopées au profil actif)
   saveProfile: (p: Profile) => Promise<void>
   applyVma: (vma: number, test?: VmaTest) => Promise<void>
   saveLog: (l: LoggedSession) => Promise<void>
@@ -34,8 +42,8 @@ const Ctx = createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
+  const [profilId, setProfilId] = useState<ProfilId | null>(null)
   const [profile, setProfile] = useState<Profile>({} as Profile)
-  const [weeks, setWeeks] = useState<Week[]>([])
   const [logs, setLogs] = useState<LoggedSession[]>([])
   const [measurements, setMeasurements] = useState<Measurement[]>([])
   const [vmaTests, setVmaTests] = useState<VmaTest[]>([])
@@ -43,106 +51,145 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [firstLaunchAt, setFirstLaunchAt] = useState<string | undefined>()
   const today = todayISO()
 
-  const reload = useCallback(async () => {
-    const [p, w, l, m, t] = await Promise.all([
-      repo.getProfile(),
-      repo.getWeeks(),
-      repo.getLogs(),
-      repo.getMeasurements(),
-      repo.getVmaTests(),
+  const profil = profilId ? getProfil(profilId) : null
+  const weeks = useMemo(() => (profil ? weeksForPlan(profil.planId) : []), [profil])
+
+  // Charge les données du profil donné en mémoire.
+  const loadProfileData = useCallback(async (id: ProfilId) => {
+    await repo.ensureProfileInitialized(id)
+    await repo.ensureFirstLaunch(id, todayISO())
+    const [p, l, m, t, meta] = await Promise.all([
+      repo.getProfile(id),
+      repo.getLogs(id),
+      repo.getMeasurements(id),
+      repo.getVmaTests(id),
+      repo.getExportMeta(id),
     ])
     setProfile(p)
-    setWeeks(w)
     setLogs(l)
     setMeasurements(m)
     setVmaTests(t)
+    setFirstLaunchAt(meta.firstLaunchAt)
+    setLastExportAt(meta.lastExportAt)
   }, [])
 
   useEffect(() => {
     ;(async () => {
-      await repo.ensureSeeded()
-      // Persistance du stockage : demande au navigateur de ne pas évincer l'IndexedDB.
+      await getDB() // déclenche la migration v1→v2 si nécessaire
       try {
         await navigator.storage?.persist?.()
       } catch {
-        /* non supporté : sans effet */
+        /* non supporté */
       }
-      await repo.ensureFirstLaunch(todayISO())
-      const meta = await repo.getExportMeta()
-      setFirstLaunchAt(meta.firstLaunchAt)
-      setLastExportAt(meta.lastExportAt)
-      await reload()
+      const active = await repo.getActiveProfileId()
+      if (active) {
+        setProfilId(active)
+        await loadProfileData(active)
+      }
       setLoading(false)
     })()
-  }, [reload])
+  }, [loadProfileData])
+
+  const switchProfile = useCallback(
+    async (id: ProfilId) => {
+      setLoading(true)
+      await repo.setActiveProfileId(id)
+      setProfilId(id)
+      await loadProfileData(id)
+      setLoading(false)
+    },
+    [loadProfileData],
+  )
 
   const markExported = useCallback(async () => {
+    if (!profilId) return
     const d = todayISO()
-    await repo.setLastExport(d)
+    await repo.setLastExport(profilId, d)
     setLastExportAt(d)
-  }, [])
+  }, [profilId])
 
   const saveProfile = useCallback(
     async (p: Profile) => {
-      await repo.saveProfile(p)
+      if (!profilId) return
+      await repo.saveProfile(profilId, p)
       setProfile(p)
     },
-    [],
+    [profilId],
   )
 
   const applyVma = useCallback(
     async (vma: number, test?: VmaTest) => {
-      const next = await repo.setVma(vma)
+      if (!profilId) return
+      const next = await repo.setVma(profilId, vma)
       setProfile(next)
       if (test) {
-        await repo.saveVmaTest(test)
-        setVmaTests(await repo.getVmaTests())
+        await repo.saveVmaTest(profilId, test)
+        setVmaTests(await repo.getVmaTests(profilId))
       }
     },
-    [],
+    [profilId],
   )
 
-  const saveLog = useCallback(async (l: LoggedSession) => {
-    await repo.saveLog(l)
-    setLogs(await repo.getLogs())
-  }, [])
+  const saveLog = useCallback(
+    async (l: LoggedSession) => {
+      if (!profilId) return
+      await repo.saveLog(profilId, l)
+      setLogs(await repo.getLogs(profilId))
+    },
+    [profilId],
+  )
 
-  const deleteLog = useCallback(async (sessionId: string, date: string) => {
-    await repo.deleteLog(sessionId, date)
-    setLogs(await repo.getLogs())
-  }, [])
+  const deleteLog = useCallback(
+    async (sessionId: string, date: string) => {
+      if (!profilId) return
+      await repo.deleteLog(profilId, sessionId, date)
+      setLogs(await repo.getLogs(profilId))
+    },
+    [profilId],
+  )
 
-  const saveMeasurement = useCallback(async (m: Measurement) => {
-    await repo.saveMeasurement(m)
-    setMeasurements(await repo.getMeasurements())
-  }, [])
+  const saveMeasurement = useCallback(
+    async (m: Measurement) => {
+      if (!profilId) return
+      await repo.saveMeasurement(profilId, m)
+      setMeasurements(await repo.getMeasurements(profilId))
+    },
+    [profilId],
+  )
 
-  const deleteMeasurement = useCallback(async (date: string) => {
-    await repo.deleteMeasurement(date)
-    setMeasurements(await repo.getMeasurements())
-  }, [])
+  const deleteMeasurement = useCallback(
+    async (date: string) => {
+      if (!profilId) return
+      await repo.deleteMeasurement(profilId, date)
+      setMeasurements(await repo.getMeasurements(profilId))
+    },
+    [profilId],
+  )
 
-  const exportAll = useCallback(() => repo.exportAll(), [])
+  const exportAll = useCallback(() => {
+    if (!profilId) throw new Error('Aucun profil actif')
+    return repo.exportAll(profilId)
+  }, [profilId])
+
   const importAll = useCallback(
     async (b: ExportBundle) => {
-      await repo.importAll(b)
-      const meta = await repo.getExportMeta()
-      setLastExportAt(meta.lastExportAt)
-      await reload()
+      if (!profilId) return
+      await repo.importAll(profilId, b)
+      await loadProfileData(profilId)
     },
-    [reload],
+    [profilId, loadProfileData],
   )
 
-  // Rappel d'export toutes les 4 semaines (référence : dernier export, sinon 1er lancement).
   const exportReminderDue = useMemo(() => {
     const ref = lastExportAt ?? firstLaunchAt
     if (!ref) return false
     return daysBetween(ref, today) >= EXPORT_REMINDER_DAYS
   }, [lastExportAt, firstLaunchAt, today])
 
-  // Alertes dérivées.
+  // Alertes (moteur allure/VMA) — uniquement pour les profils pilotés à l'allure.
+  // Le moteur d'alertes FC de Charline arrive en Phase C.
   const alerts = useMemo<Alert[]>(() => {
-    if (loading) return []
+    if (loading || !profil || profil.pilotage !== 'allure') return []
     const z2Samples: Z2Sample[] = logs
       .filter((l) => l.zoneHeld === 'Z2' && l.actualPaceS && l.actualHrAvg)
       .map((l) => ({ date: l.date, paceS: l.actualPaceS as number, hr: l.actualHrAvg as number }))
@@ -155,19 +202,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const prev = weeks.find((w) => w.number === currentWeek.number - 1)
       if (prev) previousWeekKm = weekDoneKm(prev, logs)
     }
-
-    return computeAlerts({
-      measurements,
-      logs,
-      z2Samples,
-      currentWeekKm,
-      previousWeekKm,
-      todayISO: today,
-    })
-  }, [loading, logs, measurements, weeks, today])
+    return computeAlerts({ measurements, logs, z2Samples, currentWeekKm, previousWeekKm, todayISO: today })
+  }, [loading, profil, logs, measurements, weeks, today])
 
   const value: AppState = {
     loading,
+    profilId,
+    profil,
     profile,
     weeks,
     logs,
@@ -175,6 +216,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     vmaTests,
     alerts,
     today,
+    switchProfile,
     saveProfile,
     applyVma,
     saveLog,
@@ -196,5 +238,4 @@ export function useApp(): AppState {
   return ctx
 }
 
-// Réexport utilitaire pour les écrans.
 export { parseISODate }

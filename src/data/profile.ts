@@ -1,4 +1,4 @@
-import type { Profile } from '../types'
+import type { Profile, ProfilId } from '../types'
 
 // Valeurs initiales — toutes modifiables dans les réglages.
 export const DEFAULT_PROFILE: Profile = {
@@ -12,6 +12,20 @@ export const DEFAULT_PROFILE: Profile = {
   goalTimeS: 48 * 60 + 30, // 48'30"
   testRaceName: '10 km de St-Maur',
   testRaceDate: '2026-10-04',
+}
+
+// Profil Charline — piloté FC, VMA à mesurer en semaine 4 (test demi-Cooper).
+export const DEFAULT_PROFILE_CHARLINE: Profile = {
+  ageYears: 33,
+  heightCm: 165,
+  weightKg: 0, // non renseigné pour l'instant
+  fcMax: 200,
+  fcRepos: 62,
+  vma: 0, // inconnue — mesurée en semaine 4
+}
+
+export function defaultProfileFor(id: ProfilId): Profile {
+  return id === 'charline' ? DEFAULT_PROFILE_CHARLINE : DEFAULT_PROFILE
 }
 
 // Record 5 km de référence (solo, GPS) : 25'47".

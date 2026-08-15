@@ -25,8 +25,9 @@ export function BottomNav({ active, onNavigate }: { active: ScreenId; onNavigate
             key={t.id}
             onClick={() => onNavigate(t.id)}
             className={`tap min-w-0 flex-1 whitespace-nowrap px-1 py-3 text-center font-cond text-[11px] uppercase tracking-[0.04em] ${
-              isActive ? 'border-t-2 border-ink font-bold text-ink' : 'text-ink-soft'
+              isActive ? 'border-t-2 font-bold text-ink' : 'text-ink-soft'
             }`}
+            style={isActive ? { borderTopColor: 'var(--accent, #141414)' } : undefined}
           >
             {t.label}
           </button>
