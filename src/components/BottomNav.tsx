@@ -10,6 +10,7 @@ export type ScreenId =
   | 'bilan'
   | 'renfo'
   | 'signaux'
+  | 'badges'
 
 // Cinq onglets. Libellés courts pour tenir sans chevauchement ni troncature.
 const TABS: { id: ScreenId; label: string }[] = [
@@ -21,7 +22,7 @@ const TABS: { id: ScreenId; label: string }[] = [
 ]
 
 // Les sous-écrans de « Plus » gardent l'onglet Plus actif.
-const MORE_CHILDREN: ScreenId[] = ['more', 'journal', 'measures', 'settings', 'bilan', 'renfo', 'signaux']
+const MORE_CHILDREN: ScreenId[] = ['more', 'journal', 'measures', 'settings', 'bilan', 'renfo', 'signaux', 'badges']
 
 export function BottomNav({ active, onNavigate }: { active: ScreenId; onNavigate: (s: ScreenId) => void }) {
   return (

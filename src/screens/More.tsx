@@ -9,6 +9,7 @@ const ITEMS: { id: ScreenId; label: string; desc: string }[] = [
 // Suivi qualitatif du profil FC (Charline) : bilan, renfo, signaux.
 const ITEMS_FC: { id: ScreenId; label: string; desc: string }[] = [
   { id: 'bilan', label: 'Bilan semaine', desc: 'Réalisé vs prévu, résumé coach copiable' },
+  { id: 'badges', label: 'Badges', desc: 'Jalons et régularité — sans série de jours' },
   { id: 'renfo', label: 'Renforcement', desc: '6 exercices, réinitialisés chaque semaine' },
   { id: 'signaux', label: "Signaux d'alerte", desc: 'Quand consulter · compteur chaussures' },
   { id: 'settings', label: 'Réglages', desc: 'Profil, export / import' },
