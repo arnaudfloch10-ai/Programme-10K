@@ -20,6 +20,7 @@ import { RepriseZones } from './screens/reprise/RepriseZones'
 import { RepriseBilan } from './screens/reprise/RepriseBilan'
 import { RepriseRenfo } from './screens/reprise/RepriseRenfo'
 import { RepriseSignaux } from './screens/reprise/RepriseSignaux'
+import { RepriseBadges } from './screens/reprise/RepriseBadges'
 import type { ScreenId as ScreenIdT } from './components/BottomNav'
 
 function Shell() {
@@ -112,6 +113,7 @@ function RepriseScreens({
       {screen === 'zones' && <RepriseZones />}
       {screen === 'more' && <More onNavigate={onNavigate} fc />}
       {screen === 'bilan' && <RepriseBilan />}
+      {screen === 'badges' && <RepriseBadges />}
       {screen === 'renfo' && <RepriseRenfo />}
       {screen === 'signaux' && <RepriseSignaux />}
       {screen === 'settings' && settings}
