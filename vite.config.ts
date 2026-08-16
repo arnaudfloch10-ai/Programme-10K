@@ -16,21 +16,23 @@ export default defineConfig(({ command }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['apple-touch-icon.png'],
+        includeAssets: ['favicon.ico', 'icons/favicon-32.png', 'icons/favicon-16.png', 'icons/apple-touch-icon.png'],
         manifest: {
           name: 'Programme 10 km',
           short_name: '10K',
           description: "Suivi d'entraînement running — allures dérivées de la VMA, hors ligne",
-          theme_color: '#f7f7f5',
-          background_color: '#f7f7f5',
+          theme_color: '#000000',
+          background_color: '#000000',
           display: 'standalone',
           orientation: 'portrait',
           start_url: base,
           scope: base,
+          // Chemins RELATIFS : résolus sous le scope (/Programme-10K/icons/…).
+          // Des chemins absolus /icons/… pointeraient à tort vers la racine du domaine.
           icons: [
-            { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-            { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+            { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
         workbox: {
