@@ -11,6 +11,7 @@ import { Zones } from './screens/Zones'
 import { More } from './screens/More'
 import { Journal } from './screens/Journal'
 import { Measures } from './screens/Measures'
+import { Badges } from './screens/Badges'
 import { Settings } from './screens/Settings'
 import { RepriseProvider } from './store/RepriseContext'
 import { RepriseToday } from './screens/reprise/RepriseToday'
@@ -85,6 +86,7 @@ function Shell() {
             {screen === 'more' && <More onNavigate={setScreen} />}
             {screen === 'journal' && <Journal />}
             {screen === 'measures' && <Measures />}
+            {screen === 'badges' && <Badges />}
             {screen === 'settings' && settings}
           </>
         )}

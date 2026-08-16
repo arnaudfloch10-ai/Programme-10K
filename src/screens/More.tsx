@@ -3,6 +3,7 @@ import type { ScreenId } from '../components/BottomNav'
 const ITEMS: { id: ScreenId; label: string; desc: string }[] = [
   { id: 'journal', label: 'Journal', desc: 'Historique des séances et graphiques' },
   { id: 'measures', label: 'Mesures', desc: 'Poids, circonférences, masse grasse' },
+  { id: 'badges', label: 'Badges', desc: 'Jalons et régularité — sans série de jours' },
   { id: 'settings', label: 'Réglages', desc: 'Profil, VMA, export / import' },
 ]
 
